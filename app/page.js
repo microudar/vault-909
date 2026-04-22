@@ -82,14 +82,26 @@ export default function UndergroundArchiveSite() {
             Найдено релизов: {filtered.length}
           </div>
 
-          <select
-            className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-          >
-            <option value="new">Сначала новые</option>
-            <option value="old">Сначала старые</option>
-          </select>
+          <div className="flex items-center gap-4">
+            <select
+              className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="new">Сначала новые</option>
+              <option value="old">Сначала старые</option>
+            </select>
+
+            <button
+              onClick={() => {
+                setQuery('')
+                setSelectedLabel('Все')
+              }}
+              className="text-sm text-zinc-500 hover:text-white transition"
+            >
+              Сбросить фильтры
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-8">
