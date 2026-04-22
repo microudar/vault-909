@@ -10,20 +10,13 @@ export default function UndergroundArchiveSite() {
     fetch('/data/releases.json')
       .then((r) => r.json())
       .then((data) => setReleases(data))
-      .catch(() => {
-        setReleases([])
-      })
+      .catch(() => setReleases([]))
   }, [])
 
   const labels = useMemo(() => {
     const unique = [
-      ...new Set(
-        releases
-          .map((item) => item.label)
-          .filter(Boolean)
-      ),
+      ...new Set(releases.map((item) => item.label).filter(Boolean)),
     ]
-
     return ['Все', ...unique.sort()]
   }, [releases])
 
@@ -51,43 +44,19 @@ export default function UndergroundArchiveSite() {
   }, [releases, query, selectedLabel, sortOrder])
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur sticky top-0 z-50">
-        <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-[0.2em] uppercase">
-              Архив 909
-            </h1>
-            <p className="text-sm text-zinc-400">
-              Архив андеграундной электронной музыки
-            </p>
-          </div>
-
-          <button className="rounded-2xl bg-white text-black px-5 py-2 text-sm font-medium hover:scale-105 transition">
-            Premium
-          </button>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-6 py-12">
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="mb-10">
-          <div className="inline-flex items-center rounded-full border border-zinc-700 px-4 py-2 text-xs uppercase tracking-widest text-zinc-400 mb-6">
-            {releases.length}+ релизов · техно · минимал · электро · эмбиент
-          </div>
-
-          <h2 className="text-4xl md:text-6xl font-black leading-tight max-w-4xl">
-            Найди забытые релизы, редкие лейблы и скрытые дискографии.
-          </h2>
-
-          <p className="mt-6 text-lg text-zinc-400 max-w-2xl leading-8">
-            Поиск по артистам, названиям, лейблам и каталожным номерам.
+          <h1 className="text-5xl font-black mb-3">Архив 909</h1>
+          <p className="text-zinc-500 text-lg">
+            Каталог андеграундной электронной музыки
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
           <input
-            className="lg:col-span-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-5 py-4 outline-none focus:border-zinc-600"
-            placeholder="Поиск по артисту, релизу, лейблу или номеру..."
+            className="md:col-span-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-5 py-4 outline-none focus:border-zinc-600"
+            placeholder="Поиск по артисту, релизу, лейблу или каталожному номеру..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -103,9 +72,15 @@ export default function UndergroundArchiveSite() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="flex items-center justify-between mb-8">
+          <div className="text-zinc-500">
+            Найдено релизов: {filtered.length}
+          </div>
 
           <select
-            className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-4"
+            className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
           >
@@ -114,49 +89,43 @@ export default function UndergroundArchiveSite() {
           </select>
         </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-zinc-500 text-sm">
-            Найдено релизов: {filtered.length}
-          </p>
-        </div>
-
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map((item, index) => (
             <div
               key={`${item.title}-${index}`}
-              className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 hover:border-zinc-600 hover:-translate-y-1 transition"
+              className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 hover:border-zinc-600 transition"
             >
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-4">
+              <div className="flex flex-col gap-2 mb-4">
                 {item.label && (
-                  <span className="px-3 py-1 rounded-full bg-zinc-800 text-xs text-zinc-300 whitespace-nowrap">
+                  <div className="inline-flex w-fit px-3 py-1 rounded-full bg-zinc-800 text-xs text-zinc-300">
                     {item.label}
-                  </span>
+                  </div>
                 )}
 
                 {item.catalog_number && (
-                  <span className="px-3 py-1 rounded-full border border-zinc-700 text-xs text-zinc-400 whitespace-nowrap">
+                  <div className="inline-flex w-fit px-3 py-1 rounded-full border border-zinc-700 text-xs text-zinc-400">
                     {item.catalog_number}
-                  </span>
+                  </div>
                 )}
 
                 {item.year && (
-                  <span className="px-3 py-1 rounded-full border border-zinc-800 text-xs text-zinc-500 whitespace-nowrap">
+                  <div className="inline-flex w-fit px-3 py-1 rounded-full border border-zinc-800 text-xs text-zinc-500">
                     {item.year}
-                  </span>
+                  </div>
                 )}
               </div>
 
-              <h3 className="text-2xl font-bold leading-tight mb-2">
+              <h2 className="text-2xl font-bold leading-tight mb-2">
                 {item.title || 'Без названия'}
-              </h3>
+              </h2>
 
-              <p className="text-zinc-300">
+              <p className="text-zinc-300 text-lg">
                 {item.artist || 'Неизвестный артист'}
               </p>
             </div>
           ))}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
