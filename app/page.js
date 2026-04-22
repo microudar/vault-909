@@ -26,7 +26,7 @@ export default function UndergroundArchiveSite() {
   const filtered = useMemo(() => {
     const result = releases.filter((item) => {
       const text =
-        `${item.artist || ''} ${item.title || ''} ${item.label || ''} ${item.catalog_number || ''}`
+        `${item.artist || ''} ${item.title || ''} ${item.label || ''} ${item.catalog_number || ''} ${item.year || ''}`
           .toLowerCase()
 
       const matchesQuery = text.includes(query.toLowerCase())
@@ -59,7 +59,7 @@ export default function UndergroundArchiveSite() {
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           <input
             className="md:col-span-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-5 py-4 outline-none focus:border-zinc-600"
-            placeholder="Поиск по артисту, релизу, лейблу или каталожному номеру..."
+            placeholder="Поиск по артисту, релизу, лейблу, году или каталожному номеру..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -138,9 +138,12 @@ export default function UndergroundArchiveSite() {
                 )}
               </div>
 
-              <div className="text-zinc-500 text-sm">
+              <button
+                onClick={() => setQuery(String(item.year || ''))}
+                className="text-zinc-500 text-sm hover:text-white transition"
+              >
                 {item.year || 'Год неизвестен'}
-              </div>
+              </button>
             </div>
           ))}
         </div>
