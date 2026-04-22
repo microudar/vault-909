@@ -7,6 +7,7 @@ export default function UndergroundArchiveSite() {
   const [query, setQuery] = useState('')
   const [selectedLabel, setSelectedLabel] = useState('Все')
   const [sortOrder, setSortOrder] = useState('new')
+  const [visibleCount, setVisibleCount] = useState(50)
 
   useEffect(() => {
     fetch('/data/releases.json')
@@ -14,6 +15,10 @@ export default function UndergroundArchiveSite() {
       .then((data) => setReleases(data))
       .catch(() => setReleases([]))
   }, [])
+
+  useEffect(() => {
+    setVisibleCount(50)
+  }, [query, selectedLabel, sortOrder])
 
   const labels = useMemo(() => {
     return [
@@ -42,6 +47,8 @@ export default function UndergroundArchiveSite() {
 
     return result
   }, [releases, query, selectedLabel, sortOrder])
+
+  const visible = filtered.slice(0, visibleCount)
 
   const openDiscogs = (item) => {
     const search = encodeURIComponent(
@@ -86,7 +93,7 @@ export default function UndergroundArchiveSite() {
 
         <div className="mb-8 flex items-center justify-between">
           <div className="text-sm text-zinc-500">
-            Найдено: {filtered.length}
+            Показано {visible.length} из {filtered.length}
           </div>
 
           <div className="flex items-center gap-4">
@@ -112,7 +119,7 @@ export default function UndergroundArchiveSite() {
         </div>
 
         <div className="flex flex-col">
-          {filtered.map((item, index) => (
+          {visible.map((item, index) => (
             <div
               key={index}
               className="rounded-2xl border border-zinc-800 bg-zinc-950 px-6 py-5 mb-8"
@@ -173,6 +180,17 @@ export default function UndergroundArchiveSite() {
             </div>
           ))}
         </div>
+
+        {visibleCount < filtered.length && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() => setVisibleCount((prev) => prev + 50)}
+              className="rounded-xl border border-zinc-700 px-6 py-3 text-sm text-zinc-300 hover:bg-zinc-900 transition"
+            >
+              Показать ещё
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
