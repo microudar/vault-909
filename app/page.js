@@ -50,7 +50,7 @@ export default function UndergroundArchiveSite() {
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="mb-10">
-          <h1 className="text-5xl font-black mb-3">Архив 909</h1>
+          <h1 className="text-5xl font-black mb-3">Архив 909 TEST</h1>
           <p className="text-zinc-500 text-lg">
             Каталог андеграундной электронной музыки
           </p>
