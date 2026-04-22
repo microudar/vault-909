@@ -1,25 +1,43 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-
-const sheets = [
-  { key: 'albums', title: 'Albums' },
-  { key: 'eps', title: 'EPs' },
-  { key: 'compilations', title: 'Compilations' },
-  { key: 'labels', title: 'Labels' },
-]
+import * as XLSX from 'xlsx'
 
 export default function Home() {
-  const [activeSheet, setActiveSheet] = useState('albums')
+  const [sheets, setSheets] = useState([])
+  const [activeSheet, setActiveSheet] = useState('')
   const [rows, setRows] = useState([])
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    fetch(`/data/${activeSheet}.json`)
-      .then((r) => r.json())
-      .then((data) => setRows(data))
-      .catch(() => setRows([]))
-  }, [activeSheet])
+    fetch('/music.xlsx')
+      .then((res) => res.arrayBuffer())
+      .then((buffer) => {
+        const workbook = XLSX.read(buffer, { type: 'array' })
+
+        const loadedSheets = workbook.SheetNames.map((name) => {
+          const sheet = workbook.Sheets[name]
+          const data = XLSX.utils.sheet_to_json(sheet)
+
+          return {
+            name,
+            data,
+          }
+        })
+
+        setSheets(loadedSheets)
+
+        if (loadedSheets.length > 0) {
+          setActiveSheet(loadedSheets[0].name)
+          setRows(loadedSheets[0].data)
+        }
+      })
+  }, [])
+
+  useEffect(() => {
+    const current = sheets.find((sheet) => sheet.name === activeSheet)
+    setRows(current ? current.data : [])
+  }, [activeSheet, sheets])
 
   const columns = useMemo(() => {
     if (!rows.length) return []
@@ -44,18 +62,18 @@ export default function Home() {
           <div className="flex gap-2 overflow-x-auto pb-2">
             {sheets.map((sheet) => (
               <button
-                key={sheet.key}
+                key={sheet.name}
                 onClick={() => {
-                  setActiveSheet(sheet.key)
+                  setActiveSheet(sheet.name)
                   setQuery('')
                 }}
                 className={`rounded-t-xl border px-4 py-2 text-sm whitespace-nowrap transition ${
-                  activeSheet === sheet.key
+                  activeSheet === sheet.name
                     ? 'border-zinc-700 bg-zinc-900 text-white'
                     : 'border-zinc-800 bg-zinc-950 text-zinc-500 hover:text-white'
                 }`}
               >
-                {sheet.title}
+                {sheet.name}
               </button>
             ))}
           </div>
@@ -84,7 +102,7 @@ export default function Home() {
                 {columns.map((column) => (
                   <th
                     key={column}
-                    className="sticky top-0 border-r border-zinc-800 bg-zinc-900 px-4 py-3 text-left font-semibold text-zinc-400"
+                    className="border-r border-zinc-800 px-4 py-3 text-left font-semibold text-zinc-400"
                   >
                     {column}
                   </th>
@@ -101,7 +119,7 @@ export default function Home() {
                   {columns.map((column) => (
                     <td
                       key={column}
-                      className="border-r border-zinc-800 px-4 py-3 align-top text-zinc-200"
+                      className="border-r border-zinc-800 px-4 py-3 text-zinc-200"
                     >
                       {String(row[column] ?? '')}
                     </td>
