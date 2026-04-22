@@ -70,33 +70,74 @@ export default function UndergroundArchiveSite() {
           </select>
         </div>
 
-        <div className="space-y-8">
+        <div className="mb-8 flex items-center justify-between">
+          <div className="text-sm text-zinc-500">
+            Найдено: {filtered.length}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm"
+            >
+              <option value="new">Новые</option>
+              <option value="old">Старые</option>
+            </select>
+
+            <button
+              onClick={() => {
+                setQuery('')
+                setSelectedLabel('Все')
+              }}
+              className="text-sm text-zinc-500 hover:text-white"
+            >
+              Сбросить
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col">
           {filtered.map((item, index) => (
             <div
               key={index}
-              className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-5"
+              className="rounded-2xl border border-zinc-800 bg-zinc-950 px-6 py-5 mb-8"
             >
-              <div className="text-lg font-bold mb-2">
+              <div className="text-lg font-bold mb-3 leading-snug">
                 <button
                   onClick={() => setQuery(item.artist || '')}
                   className="hover:text-zinc-300 transition"
                 >
-                  {item.artist}
-                </button>{' '}
-                — {item.title}
+                  {item.artist || 'Неизвестный артист'}
+                </button>
+
+                {' — '}
+
+                <span>{item.title || 'Без названия'}</span>
               </div>
 
-              <div className="text-sm text-zinc-400 mb-2">
+              <div className="text-sm text-zinc-400 mb-3">
                 <button
-                  onClick={() => setSelectedLabel(item.label)}
+                  onClick={() => item.label && setSelectedLabel(item.label)}
                   className="hover:text-white transition"
                 >
-                  {item.label}
+                  {item.label || 'Без лейбла'}
                 </button>
-                {item.catalog_number && ` — ${item.catalog_number}`}
+
+                {item.catalog_number && (
+                  <span className="text-zinc-500">
+                    {' '}
+                    — {item.catalog_number}
+                  </span>
+                )}
               </div>
 
-              <div className="text-xs text-zinc-500">{item.year}</div>
+              <button
+                onClick={() => setQuery(String(item.year || ''))}
+                className="text-xs text-zinc-500 hover:text-white transition"
+              >
+                {item.year || 'Год неизвестен'}
+              </button>
             </div>
           ))}
         </div>
