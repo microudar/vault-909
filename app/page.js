@@ -59,24 +59,37 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <div className="border-b border-zinc-800 bg-zinc-950">
-        <div className="mx-auto max-w-7xl px-6 py-16">
-          <h1 className="mb-4 text-6xl font-black text-white">
-            Архив 909
-          </h1>
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-16 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-2xl">
+            <img
+              src="/hero.jpg"
+              alt="Архив 909"
+              className="h-full w-full object-cover"
+            />
+          </div>
 
-          <p className="max-w-2xl text-lg text-zinc-400 leading-8">
-            Архив редкой электронной музыки: техно, минимал, эмбиент,
-            андеграундные лейблы и дискографии из твоего Excel-файла.
-          </p>
+          <div>
+            <h1 className="mb-4 text-6xl font-black text-white">
+              Архив 909
+            </h1>
 
-          <div className="mt-8 flex gap-4">
+            <p className="mb-8 text-2xl text-zinc-400">
+              Архив электронной музыки
+            </p>
+
+            <p className="max-w-xl text-lg leading-8 text-zinc-400">
+              Коллекция редкой электронной музыки: техно, минимал,
+              эмбиент, андеграундные лейблы и полные дискографии.
+              Вся информация собрана и систематизирована в одном месте.
+            </p>
+
             <button
               onClick={() => {
                 document.getElementById('archive')?.scrollIntoView({
                   behavior: 'smooth',
                 })
               }}
-              className="rounded-xl bg-white px-6 py-3 font-medium text-black hover:opacity-90"
+              className="mt-10 rounded-2xl bg-white px-8 py-4 text-lg font-semibold text-black transition hover:opacity-90"
             >
               Открыть архив
             </button>
