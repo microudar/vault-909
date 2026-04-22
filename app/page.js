@@ -13,7 +13,7 @@ export default function Home() {
   }, [])
 
   const filtered = releases.filter((item) =>
-    `${item.artist} ${item.title} ${item.label}`
+    `${item.artist} ${item.title} ${item.label} ${item.catalog_number}`
       .toLowerCase()
       .includes(query.toLowerCase())
   )
