@@ -1,8 +1,6 @@
-'use client'
-
 import { useEffect, useMemo, useState } from 'react'
 
-export default function Home() {
+export default function UndergroundArchiveSite() {
   const [releases, setReleases] = useState([])
   const [query, setQuery] = useState('')
   const [selectedLabel, setSelectedLabel] = useState('Все')
@@ -12,17 +10,28 @@ export default function Home() {
     fetch('/data/releases.json')
       .then((r) => r.json())
       .then((data) => setReleases(data))
+      .catch(() => {
+        setReleases([])
+      })
   }, [])
 
   const labels = useMemo(() => {
-    const unique = [...new Set(releases.map((r) => r.label).filter(Boolean))]
+    const unique = [
+      ...new Set(
+        releases
+          .map((item) => item.label)
+          .filter(Boolean)
+      ),
+    ]
+
     return ['Все', ...unique.sort()]
   }, [releases])
 
   const filtered = useMemo(() => {
-    let data = releases.filter((item) => {
+    const result = releases.filter((item) => {
       const text =
-        `${item.artist || ''} ${item.title || ''} ${item.label || ''} ${item.catalog_number || ''}`.toLowerCase()
+        `${item.artist || ''} ${item.title || ''} ${item.label || ''} ${item.catalog_number || ''}`
+          .toLowerCase()
 
       const matchesQuery = text.includes(query.toLowerCase())
       const matchesLabel =
@@ -31,50 +40,72 @@ export default function Home() {
       return matchesQuery && matchesLabel
     })
 
-    data.sort((a, b) => {
+    result.sort((a, b) => {
       const yearA = Number(a.year || 0)
       const yearB = Number(b.year || 0)
 
       return sortOrder === 'new' ? yearB - yearA : yearA - yearB
     })
 
-    return data
+    return result
   }, [releases, query, selectedLabel, sortOrder])
 
   return (
-    <main className="min-h-screen bg-black text-white p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-5xl font-bold mb-2">Архив 909</h1>
-        <p className="text-zinc-500 mb-8">
-          Каталог андеграундной электронной музыки
-        </p>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+      <header className="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur sticky top-0 z-50">
+        <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-[0.2em] uppercase">
+              Архив 909
+            </h1>
+            <p className="text-sm text-zinc-400">
+              Архив андеграундной электронной музыки
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <button className="rounded-2xl bg-white text-black px-5 py-2 text-sm font-medium hover:scale-105 transition">
+            Premium
+          </button>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-6 py-12">
+        <div className="mb-10">
+          <div className="inline-flex items-center rounded-full border border-zinc-700 px-4 py-2 text-xs uppercase tracking-widest text-zinc-400 mb-6">
+            {releases.length}+ релизов · техно · минимал · электро · эмбиент
+          </div>
+
+          <h2 className="text-4xl md:text-6xl font-black leading-tight max-w-4xl">
+            Найди забытые релизы, редкие лейблы и скрытые дискографии.
+          </h2>
+
+          <p className="mt-6 text-lg text-zinc-400 max-w-2xl leading-8">
+            Поиск по артистам, названиям, лейблам и каталожным номерам.
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-4 gap-4 mb-8">
           <input
-            className="md:col-span-2 rounded-xl bg-zinc-900 border border-zinc-700 p-4 outline-none focus:border-zinc-500"
-            placeholder="Поиск по артисту, релизу, лейблу..."
+            className="lg:col-span-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-5 py-4 outline-none focus:border-zinc-600"
+            placeholder="Поиск по артисту, релизу, лейблу или номеру..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
 
           <select
-            className="rounded-xl bg-zinc-900 border border-zinc-700 p-4"
+            className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-4"
             value={selectedLabel}
             onChange={(e) => setSelectedLabel(e.target.value)}
           >
             {labels.map((label) => (
-              <option key={label}>{label}</option>
+              <option key={label} value={label}>
+                {label}
+              </option>
             ))}
           </select>
-        </div>
-
-        <div className="flex items-center justify-between mb-6">
-          <div className="text-zinc-500 text-sm">
-            Найдено: {filtered.length}
-          </div>
 
           <select
-            className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2"
+            className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-4"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
           >
@@ -83,43 +114,49 @@ export default function Home() {
           </select>
         </div>
 
-        <div className="grid gap-4">
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-zinc-500 text-sm">
+            Найдено релизов: {filtered.length}
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map((item, index) => (
             <div
-              key={item.id || index}
-              className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 hover:border-zinc-600 transition"
+              key={`${item.title}-${index}`}
+              className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 hover:border-zinc-600 hover:-translate-y-1 transition"
             >
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-4">
                 {item.label && (
-                  <span className="px-3 py-1 rounded-full bg-zinc-800 text-xs text-zinc-300">
+                  <span className="px-3 py-1 rounded-full bg-zinc-800 text-xs text-zinc-300 whitespace-nowrap">
                     {item.label}
                   </span>
                 )}
 
                 {item.catalog_number && (
-                  <span className="px-3 py-1 rounded-full border border-zinc-700 text-xs text-zinc-400">
+                  <span className="px-3 py-1 rounded-full border border-zinc-700 text-xs text-zinc-400 whitespace-nowrap">
                     {item.catalog_number}
                   </span>
                 )}
 
                 {item.year && (
-                  <span className="px-3 py-1 rounded-full border border-zinc-800 text-xs text-zinc-500">
+                  <span className="px-3 py-1 rounded-full border border-zinc-800 text-xs text-zinc-500 whitespace-nowrap">
                     {item.year}
                   </span>
                 )}
               </div>
 
-              <div className="text-2xl font-bold">
+              <h3 className="text-2xl font-bold leading-tight mb-2">
                 {item.title || 'Без названия'}
-              </div>
+              </h3>
 
-              <div className="text-zinc-300 mt-1">
+              <p className="text-zinc-300">
                 {item.artist || 'Неизвестный артист'}
-              </div>
+              </p>
             </div>
           ))}
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }
