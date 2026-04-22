@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useMemo, useState } from 'react'
 
 export default function UndergroundArchiveSite() {
@@ -96,33 +97,19 @@ export default function UndergroundArchiveSite() {
               key={`${item.title}-${index}`}
               className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 hover:border-zinc-600 transition"
             >
-              <div className="flex flex-col gap-2 mb-4">
-                {item.label && (
-                  <div className="inline-flex w-fit px-3 py-1 rounded-full bg-zinc-800 text-xs text-zinc-300">
-                    {item.label}
-                  </div>
-                )}
-
-                {item.catalog_number && (
-                  <div className="inline-flex w-fit px-3 py-1 rounded-full border border-zinc-700 text-xs text-zinc-400">
-                    {item.catalog_number}
-                  </div>
-                )}
-
-                {item.year && (
-                  <div className="inline-flex w-fit px-3 py-1 rounded-full border border-zinc-800 text-xs text-zinc-500">
-                    {item.year}
-                  </div>
-                )}
+              <div className="text-xl font-bold leading-tight mb-2">
+                {item.artist || 'Неизвестный артист'} —{' '}
+                {item.title || 'Без названия'}
               </div>
 
-              <h2 className="text-2xl font-bold leading-tight mb-2">
-                {item.title || 'Без названия'}
-              </h2>
+              <div className="text-zinc-400 mb-1">
+                {item.label || 'Без лейбла'}
+                {item.catalog_number && ` — ${item.catalog_number}`}
+              </div>
 
-              <p className="text-zinc-300 text-lg">
-                {item.artist || 'Неизвестный артист'}
-              </p>
+              <div className="text-zinc-500 text-sm">
+                {item.year || 'Год неизвестен'}
+              </div>
             </div>
           ))}
         </div>
