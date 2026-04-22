@@ -58,10 +58,34 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
+      <div className="border-b border-zinc-800 bg-zinc-950">
+        <div className="mx-auto max-w-7xl px-6 py-16">
+          <h1 className="mb-4 text-6xl font-black text-white">
+            Архив 909
+          </h1>
+
+          <p className="max-w-2xl text-lg text-zinc-400 leading-8">
+            Архив редкой электронной музыки: техно, минимал, эмбиент,
+            андеграундные лейблы и дискографии из твоего Excel-файла.
+          </p>
+
+          <div className="mt-8 flex gap-4">
+            <button
+              onClick={() => {
+                document.getElementById('archive')?.scrollIntoView({
+                  behavior: 'smooth',
+                })
+              }}
+              className="rounded-xl bg-white px-6 py-3 font-medium text-black hover:opacity-90"
+            >
+              Открыть архив
+            </button>
+          </div>
+        </div>
+      </div>
+
       <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto max-w-7xl px-6 py-6">
-          <h1 className="mb-6 text-4xl font-black">Архив 909</h1>
-
           <div className="mb-6 flex gap-2 overflow-x-auto border-b border-zinc-800 pb-0">
             {sheets.map((sheet) => (
               <button
@@ -70,10 +94,10 @@ export default function Home() {
                   setActiveSheet(sheet.name)
                   setQuery('')
                 }}
-                className={`relative px-5 py-3 text-sm font-medium transition whitespace-nowrap rounded-t-xl border border-b-0 ${
+                className={`relative -mb-px rounded-t-xl border border-b-0 px-5 py-3 text-sm font-medium whitespace-nowrap transition ${
                   activeSheet === sheet.name
-                    ? 'bg-zinc-900 text-white border-zinc-700'
-                    : 'bg-zinc-950 text-zinc-500 border-transparent hover:text-white hover:bg-zinc-900/50'
+                    ? 'border-zinc-700 bg-zinc-900 text-white'
+                    : 'border-transparent bg-zinc-950 text-zinc-500 hover:bg-zinc-900/50 hover:text-white'
                 }`}
               >
                 {sheet.name}
@@ -83,7 +107,10 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-6">
+      <main
+        id="archive"
+        className="mx-auto max-w-7xl px-6 py-6"
+      >
         <div className="mb-6 flex items-center justify-between gap-4">
           <input
             type="text"
