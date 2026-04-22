@@ -48,9 +48,9 @@ export default function UndergroundArchiveSite() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-10">
-          <h1 className="text-5xl font-black mb-3">Архив 909 TEST</h1>
+          <h1 className="text-5xl font-black mb-3">Архив 909</h1>
           <p className="text-zinc-500 text-lg">
             Каталог андеграундной электронной музыки
           </p>
@@ -92,11 +92,11 @@ export default function UndergroundArchiveSite() {
           </select>
         </div>
 
-        <div className="flex flex-col space-y-10">
+        <div className="flex flex-col gap-8">
           {filtered.map((item, index) => (
             <div
               key={`${item.title}-${index}`}
-              className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 mb-6 hover:border-zinc-600 transition"
+              className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl mb-8 hover:border-zinc-600 transition"
             >
               <div className="text-xl font-bold leading-tight mb-3">
                 {item.artist || 'Неизвестный артист'} —{' '}
