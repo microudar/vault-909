@@ -91,7 +91,7 @@ export default function UndergroundArchiveSite() {
           </select>
         </div>
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-10">
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-12">
           {filtered.map((item, index) => (
             <div
               key={`${item.title}-${index}`}
