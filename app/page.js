@@ -43,6 +43,20 @@ export default function UndergroundArchiveSite() {
     return result
   }, [releases, query, selectedLabel, sortOrder])
 
+  const openDiscogs = (item) => {
+    const search = encodeURIComponent(
+      `${item.artist || ''} ${item.title || ''}`
+    )
+    window.open(`https://www.discogs.com/search/?q=${search}`, '_blank')
+  }
+
+  const openBandcamp = (item) => {
+    const search = encodeURIComponent(
+      `${item.artist || ''} ${item.title || ''}`
+    )
+    window.open(`https://bandcamp.com/search?q=${search}`, '_blank')
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-5xl mx-auto px-6 py-10">
@@ -132,12 +146,30 @@ export default function UndergroundArchiveSite() {
                 )}
               </div>
 
-              <button
-                onClick={() => setQuery(String(item.year || ''))}
-                className="text-xs text-zinc-500 hover:text-white transition"
-              >
-                {item.year || 'Год неизвестен'}
-              </button>
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setQuery(String(item.year || ''))}
+                  className="text-xs text-zinc-500 hover:text-white transition"
+                >
+                  {item.year || 'Год неизвестен'}
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => openDiscogs(item)}
+                    className="rounded-lg border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800 transition"
+                  >
+                    Discogs
+                  </button>
+
+                  <button
+                    onClick={() => openBandcamp(item)}
+                    className="rounded-lg border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800 transition"
+                  >
+                    Bandcamp
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
