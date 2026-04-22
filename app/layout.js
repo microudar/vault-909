@@ -1,9 +1,12 @@
+import './globals.css'
+
 export const metadata = {
   title: 'Архив 909',
-  description: 'Музыкальный архив',
+  description: 'Архив электронной музыки',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
-
-import './globals.css'
 
 export default function RootLayout({ children }) {
   return (
