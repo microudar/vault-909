@@ -124,6 +124,10 @@ export default function UndergroundArchiveSite() {
               key={index}
               className="rounded-2xl border border-zinc-800 bg-zinc-950 px-6 py-5 mb-8"
             >
+              <div className="w-16 h-16 rounded-lg bg-zinc-800 mb-4 flex items-center justify-center text-[10px] text-zinc-500 uppercase">
+                Cover
+              </div>
+
               <div className="text-lg font-bold mb-3 leading-snug">
                 <button
                   onClick={() => setQuery(item.artist || '')}
@@ -179,18 +183,16 @@ export default function UndergroundArchiveSite() {
               </div>
             </div>
           ))}
-        </div>
 
-        {visibleCount < filtered.length && (
-          <div className="flex justify-center mt-4">
+          {visibleCount < filtered.length && (
             <button
               onClick={() => setVisibleCount((prev) => prev + 50)}
-              className="rounded-xl border border-zinc-700 px-6 py-3 text-sm text-zinc-300 hover:bg-zinc-900 transition"
+              className="mx-auto mt-2 rounded-xl border border-zinc-700 px-5 py-3 text-sm text-zinc-300 hover:bg-zinc-900 transition"
             >
               Показать ещё
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
