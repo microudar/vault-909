@@ -70,10 +70,10 @@ export default function Home() {
                   setActiveSheet(sheet.name)
                   setQuery('')
                 }}
-                className={`relative -mb-px rounded-t-xl border border-b-0 px-5 py-3 text-sm font-medium whitespace-nowrap transition ${
+                className={`relative px-5 py-3 text-sm font-medium transition whitespace-nowrap rounded-t-xl border border-b-0 ${
                   activeSheet === sheet.name
-                    ? 'border-zinc-700 bg-zinc-900 text-white'
-                    : 'border-transparent bg-zinc-950 text-zinc-500 hover:bg-zinc-900/50 hover:text-white'
+                    ? 'bg-zinc-900 text-white border-zinc-700'
+                    : 'bg-zinc-950 text-zinc-500 border-transparent hover:text-white hover:bg-zinc-900/50'
                 }`}
               >
                 {sheet.name}
@@ -114,49 +114,21 @@ export default function Home() {
             </thead>
 
             <tbody>
-              {filteredRows.map((row, index) => {
-                const search = encodeURIComponent(
-                  `${row.artist || ''} ${row.title || ''}`
-                )
-
-                return (
-                  <tr
-                    key={index}
-                    className="group border-b border-zinc-800 transition hover:bg-zinc-800/30"
-                  >
-                    {columns.map((column, columnIndex) => (
-                      <td
-                        key={column}
-                        className="relative border-r border-zinc-800 px-4 py-3 text-zinc-200 whitespace-nowrap"
-                      >
-                        {String(row[column] ?? '')}
-
-                        {columnIndex === columns.length - 1 && (
-                          <div className="absolute right-4 top-1/2 hidden -translate-y-1/2 gap-2 group-hover:flex">
-                            <a
-                              href={`https://www.discogs.com/search/?q=${search}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-500"
-                            >
-                              Discogs
-                            </a>
-
-                            <a
-                              href={`https://bandcamp.com/search?q=${search}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="rounded bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-500"
-                            >
-                              Bandcamp
-                            </a>
-                          </div>
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                )
-              })}
+              {filteredRows.map((row, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-zinc-800 transition hover:bg-zinc-800/30"
+                >
+                  {columns.map((column) => (
+                    <td
+                      key={column}
+                      className="border-r border-zinc-800 px-4 py-3 text-zinc-200 whitespace-nowrap"
+                    >
+                      {String(row[column] ?? '')}
+                    </td>
+                  ))}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
