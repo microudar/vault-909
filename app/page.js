@@ -19,6 +19,7 @@ export default function UndergroundArchiveSite() {
     const unique = [
       ...new Set(releases.map((item) => item.label).filter(Boolean)),
     ]
+
     return ['Все', ...unique.sort()]
   }, [releases])
 
@@ -95,14 +96,14 @@ export default function UndergroundArchiveSite() {
           {filtered.map((item, index) => (
             <div
               key={`${item.title}-${index}`}
-              className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 hover:border-zinc-600 transition"
+              className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 mb-6 hover:border-zinc-600 transition"
             >
-              <div className="text-xl font-bold leading-tight mb-2">
+              <div className="text-xl font-bold leading-tight mb-3">
                 {item.artist || 'Неизвестный артист'} —{' '}
                 {item.title || 'Без названия'}
               </div>
 
-              <div className="text-zinc-400 mb-1">
+              <div className="text-zinc-400 mb-2">
                 {item.label || 'Без лейбла'}
                 {item.catalog_number && ` — ${item.catalog_number}`}
               </div>
