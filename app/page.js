@@ -98,13 +98,18 @@ export default function UndergroundArchiveSite() {
               key={`${item.title}-${index}`}
               className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl hover:border-zinc-600 transition"
             >
-              <button
-                onClick={() => setQuery(item.artist || '')}
-                className="text-xl font-bold leading-tight mb-3 hover:text-zinc-300 transition text-left"
-              >
-                {item.artist || 'Неизвестный артист'} —{' '}
-                {item.title || 'Без названия'}
-              </button>
+              <div className="text-xl font-bold leading-tight mb-3">
+                <button
+                  onClick={() => setQuery(item.artist || '')}
+                  className="hover:text-zinc-300 transition text-left"
+                >
+                  {item.artist || 'Неизвестный артист'}
+                </button>
+
+                {' — '}
+
+                <span>{item.title || 'Без названия'}</span>
+              </div>
 
               <div className="mb-2 flex items-center gap-2 flex-wrap">
                 <button
