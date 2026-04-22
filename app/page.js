@@ -1,4 +1,48 @@
 'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+
+const sheets = [
+  { key: 'albums', title: 'Albums' },
+  { key: 'eps', title: 'EPs' },
+  { key: 'compilations', title: 'Compilations' },
+  { key: 'labels', title: 'Labels' },
+]
+
+export default function Home() {
+  const [activeSheet, setActiveSheet] = useState('albums')
+  const [rows, setRows] = useState([])
+  const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    fetch(`/data/${activeSheet}.json`)
+      .then((r) => r.json())
+      .then((data) => setRows(data))
+      .catch(() => setRows([]))
+  }, [activeSheet])
+
+  const columns = useMemo(() => {
+    if (!rows.length) return []
+    return Object.keys(rows[0])
+  }, [rows])
+
+  const filteredRows = useMemo(() => {
+    return rows.filter((row) =>
+      Object.values(row)
+        .join(' ')
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    )
+  }, [rows, query])
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950">
+        <div className="mx-auto max-w-7xl px-6 py-6">
+          <h1 className="mb-6 text-4xl font-black">Архив 909</h1>
+
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {sheets.map((sheet) => (
               <button
                 key={sheet.key}
                 onClick={() => {
