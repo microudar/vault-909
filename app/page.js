@@ -39,7 +39,8 @@ export default function Home() {
             <div className="text-2xl font-bold">{item.title}</div>
             <div>{item.artist}</div>
             <div className="text-zinc-500">
-              {item.label} · {item.year}
+  {item.label} · {item.catalog_number} · {item.year}
+</div>
             </div>
           </div>
         ))}
