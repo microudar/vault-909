@@ -101,20 +101,13 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 py-6">
           <div className="mb-6 flex gap-2 overflow-x-auto border-b border-zinc-800 pb-0">
             {sheets.map((sheet) => (
-              <button
+              <a
                 key={sheet.name}
-                onClick={() => {
-                  setActiveSheet(sheet.name)
-                  setQuery('')
-                }}
-                className={`relative -mb-px rounded-t-xl border border-b-0 px-5 py-3 text-sm font-medium whitespace-nowrap transition ${
-                  activeSheet === sheet.name
-                    ? 'border-zinc-700 bg-zinc-900 text-white'
-                    : 'border-transparent bg-zinc-950 text-zinc-500 hover:bg-zinc-900/50 hover:text-white'
-                }`}
+                href={`/sheet/${sheet.name}`}
+                className="relative -mb-px rounded-t-xl border border-b-0 px-5 py-3 text-sm font-medium whitespace-nowrap transition border-transparent bg-zinc-950 text-zinc-500 hover:bg-zinc-900/50 hover:text-white"
               >
                 {sheet.name}
-              </button>
+              </a>
             ))}
           </div>
         </div>
