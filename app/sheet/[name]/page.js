@@ -11,6 +11,55 @@ function slugify(text) {
     .replace(/\s+/g, '-')
 }
 
+// 🔥 парсер релиза
+function parseRelease(text) {
+  if (!text) return {}
+
+  const match = text.match(/\[(.*?)\]/)
+
+  let label = ''
+  let catalog = ''
+
+  if (match) {
+    const inside = match[1].trim()
+
+    if (inside.includes('/')) {
+      const parts = inside.split('/')
+      label = parts[0]?.trim() || ''
+      catalog = parts[1]?.trim() || ''
+    } else {
+      catalog = inside
+    }
+  }
+
+  const cleaned = text.replace(/\[.*?\]/, '').trim()
+
+  const parts = cleaned.split(' - ')
+  const artistPart = parts.shift()
+  const restJoined = parts.join(' - ')
+
+  const artists = artistPart
+    ? artistPart.split(/[\/,&]/).map(a => a.trim()).filter(Boolean)
+    : []
+
+  let title = ''
+  let year = ''
+
+  if (restJoined) {
+    const words = restJoined.trim().split(' ')
+    year = words.pop()
+    title = words.join(' ')
+  }
+
+  return {
+    artists,
+    title,
+    label,
+    catalog,
+    year,
+  }
+}
+
 export default function SheetPage() {
   const { name } = useParams()
 
@@ -52,10 +101,12 @@ export default function SheetPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
       
+      {/* Заголовок */}
       <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
         {title || name}
       </h1>
 
+      {/* Поиск */}
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -69,20 +120,39 @@ export default function SheetPage() {
         }}
       />
 
+      {/* Список релизов */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {filtered.map((row, i) => (
-          <div
-            key={i}
-            style={{
-              padding: '12px',
-              background: '#18181b',
-              border: '1px solid #27272a',
-              borderRadius: '8px'
-            }}
-          >
-            {Object.values(row).join(' ')}
-          </div>
-        ))}
+        {filtered.map((row, i) => {
+          const text = Object.values(row).join(' ')
+          const parsed = parseRelease(text)
+
+          return (
+            <div
+              key={i}
+              style={{
+                padding: '14px 16px',
+                border: '1px solid #27272a',
+                background: '#18181b',
+                borderRadius: '10px'
+              }}
+            >
+              {/* Артист + название */}
+              <div style={{ fontSize: '15px', color: '#fff' }}>
+                {parsed.artists.join(', ')} — {parsed.title}
+                {parsed.year && ` (${parsed.year})`}
+              </div>
+
+              {/* Лейбл */}
+              {(parsed.label || parsed.catalog) && (
+                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+                  {parsed.label}
+                  {parsed.label && parsed.catalog && ' / '}
+                  {parsed.catalog}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
 
     </div>
