@@ -41,9 +41,26 @@ text = text.replace(/\[\[/g, '[')
   const artistPart = parts.shift()
   const restJoined = parts.join(' - ')
 
-  const artists = artistPart
-    ? artistPart.split(/[\/,&]/).map(a => a.trim()).filter(Boolean)
-    : []
+  let artists = []
+
+if (artistPart) {
+  if (artistPart.trim().toLowerCase() === 'va') {
+    // 🔥 если VA — пытаемся взять артиста из названия
+    const parts = restJoined.split(' - ')
+    const possibleArtist = parts[1]
+
+    if (possibleArtist) {
+      artists = [possibleArtist.trim()]
+    } else {
+      artists = ['VA']
+    }
+  } else {
+    artists = artistPart
+      .split(/[\/,&]/)
+      .map(a => a.trim())
+      .filter(Boolean)
+  }
+}
 
   let title = ''
   let year = ''
