@@ -66,14 +66,17 @@ if (cleanArtistPart) {
   }
 }
 
-  let title = ''
-  let year = ''
+let title = ''
+let year = ''
 
-  if (restJoined) {
-    const words = restJoined.trim().split(' ')
-    year = words.pop()
-    title = words.join(' ')
-  }
+if (restJoined) {
+  // 🔥 ищем год нормально
+  const yearMatch = restJoined.match(/\b\d{4}\b/)
+  year = yearMatch ? yearMatch[0] : ''
+
+  // 🔥 убираем год из названия
+  title = restJoined.replace(/\b\d{4}\b/, '').trim()
+}
 
   return {
     artists,
