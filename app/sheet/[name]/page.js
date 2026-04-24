@@ -21,7 +21,9 @@ function parseRelease(text) {
   let catalog = ''
 
   if (match) {
-    const inside = match[1].trim()
+    const inside = match[1]
+  .replace('//', '/')
+  .trim()
 
     if (inside.includes('/')) {
       const parts = inside.split('/')
