@@ -39,13 +39,17 @@ text = text.replace(/\[\[/g, '[')
 
   const parts = cleaned.split(' - ')
   const artistPart = parts.shift()
-  const restJoined = parts.join(' - ')
+const restJoined = parts.join(' - ')
 
-  let artists = []
+// 🔥 чистим артиста от года
+const cleanArtistPart = artistPart
+  ? artistPart.replace(/\b\d{4}\b/g, '').trim()
+  : ''
 
-if (artistPart) {
-  if (artistPart.trim().toLowerCase() === 'va') {
-    // 🔥 если VA — пытаемся взять артиста из названия
+let artists = []
+
+if (cleanArtistPart) {
+  if (cleanArtistPart.toLowerCase() === 'va') {
     const parts = restJoined.split(' - ')
     const possibleArtist = parts[1]
 
@@ -55,7 +59,7 @@ if (artistPart) {
       artists = ['VA']
     }
   } else {
-    artists = artistPart
+    artists = cleanArtistPart
       .split(/[\/,&]/)
       .map(a => a.trim())
       .filter(Boolean)
