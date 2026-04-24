@@ -14,6 +14,8 @@ function slugify(text) {
 // 🔥 парсер релиза
 function parseRelease(text) {
   if (!text) return {}
+  // 🔥 нормализуем тире (КЛЮЧЕВОЙ фикс)
+text = text.replace(/—/g, '-')
   // 🔥 убираем год в начале строки (например "Brodinski 2011 — ...")
 // 🔥 убираем год перед "—" (любой формат пробелов)
 text = text.replace(/^(.*?)\s+\d{4}\s+—/, '$1 —')
