@@ -4,11 +4,19 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
+// 🔥 slug функция
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+}
+
 export default function SheetPage() {
   const { name } = useParams()
 
   const [rows, setRows] = useState([])
   const [query, setQuery] = useState('')
+  const [title, setTitle] = useState('')
 
   useEffect(() => {
     fetch('/music.xlsx')
@@ -16,12 +24,21 @@ export default function SheetPage() {
       .then((buffer) => {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
-        const sheet = workbook.Sheets[name]
+        // 🔥 ищем реальное имя листа
+        const realName = workbook.SheetNames.find(
+          (n) => slugify(n) === name
+        )
 
-        if (!sheet) return
+        if (!realName) {
+          console.log('Лист не найден:', name)
+          return
+        }
 
+        const sheet = workbook.Sheets[realName]
         const data = XLSX.utils.sheet_to_json(sheet)
+
         setRows(data)
+        setTitle(realName)
       })
   }, [name])
 
@@ -33,23 +50,41 @@ export default function SheetPage() {
   )
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">{name}</h1>
+    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
+      
+      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
+        {title || name}
+      </h1>
 
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Поиск..."
-        className="mb-6 w-full max-w-md p-3 bg-zinc-900 border border-zinc-700"
+        style={{
+          padding: '10px',
+          marginBottom: '20px',
+          background: '#18181b',
+          border: '1px solid #27272a',
+          color: '#fff'
+        }}
       />
 
-      <div className="space-y-2">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {filtered.map((row, i) => (
-          <div key={i} className="border-b border-zinc-800 py-2">
+          <div
+            key={i}
+            style={{
+              padding: '12px',
+              background: '#18181b',
+              border: '1px solid #27272a',
+              borderRadius: '8px'
+            }}
+          >
             {Object.values(row).join(' ')}
           </div>
         ))}
       </div>
+
     </div>
   )
 }
