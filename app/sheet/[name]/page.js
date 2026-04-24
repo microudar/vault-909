@@ -14,7 +14,8 @@ function slugify(text) {
 // 🔥 парсер релиза
 function parseRelease(text) {
   if (!text) return {}
-
+// 🔥 чистим двойные скобки
+text = text.replace(/\[\[/g, '[')
   const match = text.match(/\[(.*?)\]/)
 
   let label = ''
