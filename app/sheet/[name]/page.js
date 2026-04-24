@@ -100,7 +100,19 @@ export default function SheetPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
+      <button
+      onClick={() => window.location.href = '/'}
+      style={{
+        marginBottom: '20px',
+        padding: '8px 14px',
+        background: '#18181b',
+        border: '1px solid #27272a',
+        color: '#fff',
+        cursor: 'pointer'
+      }}
+    >
+      ← Назад
+    </button>
       {/* Заголовок */}
       <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
         {title || name}
