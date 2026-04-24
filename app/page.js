@@ -131,7 +131,7 @@ export default function Home() {
           {sheets.map((sheet) => (
             <a
               key={sheet.name}
-              href={`/sheet/${sheet.name}`}
+              href={`/sheet/${slugify(sheet.name)}`}
               style={{
                 padding: '10px 16px',
                 background: '#18181b',
