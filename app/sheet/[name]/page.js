@@ -18,7 +18,7 @@ function parseRelease(text) {
 text = text.replace(/—/g, '-')
   // 🔥 убираем год в начале строки (например "Brodinski 2011 — ...")
 // 🔥 убираем год перед "—" (любой формат пробелов)
-text = text.replace(/^(.*?)\s+\d{4}\s+-/, '$1 -')
+
 // 🔥 чистим двойные скобки
 text = text.replace(/\[\[/g, '[')
   const match = text.match(/\[(.*?)\]/)
