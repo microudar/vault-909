@@ -18,7 +18,6 @@ export default function Home() {
         const loadedSheets = workbook.SheetNames.map((name) => {
           const sheet = workbook.Sheets[name]
           const data = XLSX.utils.sheet_to_json(sheet)
-
           return { name, data }
         })
 
@@ -38,11 +37,6 @@ export default function Home() {
     const current = sheets.find((s) => s.name === activeSheet)
     setRows(current ? current.data : [])
   }, [activeSheet, sheets])
-
-  const columns = useMemo(() => {
-    if (!rows.length) return []
-    return Object.keys(rows[0])
-  }, [rows])
 
   const filteredRows = useMemo(() => {
     return rows.filter((row) =>
@@ -135,46 +129,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ТАБЛИЦА */}
+      {/* СПИСОК РЕЛИЗОВ */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px' }}>
-        <div style={{ overflow: 'auto', border: '1px solid #27272a' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-            <thead>
-              <tr style={{ background: '#18181b' }}>
-                {columns.map((column) => (
-                  <th
-                    key={column}
-                    style={{
-                      border: '1px solid #27272a',
-                      padding: '8px',
-                      textAlign: 'left',
-                      color: '#a1a1aa'
-                    }}
-                  >
-                    {column}
-                  </th>
-                ))}
-              </tr>
-            </thead>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {filteredRows.map((row, i) => {
+            const text = Object.values(row).join(' ')
 
-            <tbody>
-              {filteredRows.map((row, i) => (
-                <tr key={i}>
-                  {columns.map((col) => (
-                    <td
-                      key={col}
-                      style={{
-                        border: '1px solid #27272a',
-                        padding: '8px'
-                      }}
-                    >
-                      {String(row[col] ?? '')}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            return (
+              <div
+                key={i}
+                style={{
+                  padding: '12px 14px',
+                  border: '1px solid #27272a',
+                  background: '#18181b',
+                  borderRadius: '8px'
+                }}
+              >
+                {text}
+              </div>
+            )
+          })}
         </div>
       </div>
 
