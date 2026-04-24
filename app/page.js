@@ -19,10 +19,7 @@ export default function Home() {
           const sheet = workbook.Sheets[name]
           const data = XLSX.utils.sheet_to_json(sheet)
 
-          return {
-            name,
-            data,
-          }
+          return { name, data }
         })
 
         setSheets(loadedSheets)
@@ -38,7 +35,7 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    const current = sheets.find((sheet) => sheet.name === activeSheet)
+    const current = sheets.find((s) => s.name === activeSheet)
     setRows(current ? current.data : [])
   }, [activeSheet, sheets])
 
@@ -57,91 +54,102 @@ export default function Home() {
   }, [rows, query])
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div style={{ minHeight: '100vh', background: '#09090b', color: '#e4e4e7' }}>
+      
       {/* HERO */}
-      <div className="border-b border-zinc-800 bg-zinc-950">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-16 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-2xl">
-            <img
-              src="/hero.jpg"
-              alt="Архив 909"
-              className="h-full w-full object-cover"
-            />
-          </div>
+      <div style={{ borderBottom: '1px solid #27272a' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: '900', marginBottom: '10px' }}>
+            Архив 909
+          </h1>
 
-          <div>
-            <h1 className="mb-4 text-6xl font-black text-white">
-              Архив 909
-            </h1>
+          <p style={{ color: '#a1a1aa', marginBottom: '10px' }}>
+            Архив электронной музыки
+          </p>
 
-            <p className="mb-8 text-2xl text-zinc-400">
-              Архив электронной музыки
-            </p>
-
-            <p className="max-w-xl text-lg leading-8 text-zinc-400">
-              Коллекция редкой электронной музыки: техно, минимал,
-              эмбиент, андеграундные лейблы и полные дискографии.
-              Вся информация собрана и систематизирована в одном месте.
-            </p>
-
-            <button
-              onClick={() => {
-                document.getElementById('archive')?.scrollIntoView({
-                  behavior: 'smooth',
-                })
-              }}
-              className="mt-10 rounded-2xl bg-white px-8 py-4 text-lg font-semibold text-black transition hover:opacity-90"
-            >
-              Открыть архив
-            </button>
-          </div>
+          <p style={{ color: '#a1a1aa', maxWidth: '700px' }}>
+            Коллекция редкой электронной музыки: техно, минимал,
+            эмбиент, андеграундные лейблы и полные дискографии.
+          </p>
         </div>
       </div>
 
       {/* ВКЛАДКИ */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950">
-        <div className="mx-auto max-w-7xl px-6 py-6">
-          <div className="mb-6 flex gap-2 overflow-x-auto border-b border-zinc-800">
-            {sheets.map((sheet) => (
-              <a
-                key={sheet.name}
-                href={`/sheet/${sheet.name}`}
-                className="relative -mb-px rounded-t-xl border border-b-0 border-zinc-800 bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-400 whitespace-nowrap transition hover:bg-zinc-800 hover:text-white"
-              >
-                {sheet.name}
-              </a>
-            ))}
-          </div>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          overflowX: 'auto',
+          borderBottom: '1px solid #27272a',
+          paddingBottom: '4px',
+          marginBottom: '16px'
+        }}>
+          {sheets.map((sheet) => (
+            <a
+              key={sheet.name}
+              href={`/sheet/${sheet.name}`}
+              style={{
+                padding: '10px 16px',
+                background: '#18181b',
+                border: '1px solid #27272a',
+                borderBottom: 'none',
+                borderRadius: '10px 10px 0 0',
+                color: '#a1a1aa',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                fontSize: '14px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#27272a'
+                e.target.style.color = '#fff'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = '#18181b'
+                e.target.style.color = '#a1a1aa'
+              }}
+            >
+              {sheet.name}
+            </a>
+          ))}
         </div>
-      </header>
+      </div>
+
+      {/* ПОИСК */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 20px' }}>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Поиск..."
+          style={{
+            width: '100%',
+            maxWidth: '400px',
+            padding: '10px',
+            background: '#18181b',
+            border: '1px solid #27272a',
+            color: '#fff'
+          }}
+        />
+
+        <div style={{ marginTop: '10px', color: '#71717a' }}>
+          {filteredRows.length} строк
+        </div>
+      </div>
 
       {/* ТАБЛИЦА */}
-      <main
-        id="archive"
-        className="mx-auto max-w-7xl px-6 py-6"
-      >
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск по текущему листу..."
-            className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 outline-none focus:border-zinc-600"
-          />
-
-          <div className="text-sm text-zinc-500 whitespace-nowrap">
-            {filteredRows.length} строк
-          </div>
-        </div>
-
-        <div className="overflow-auto rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl">
-          <table className="min-w-full border-collapse text-sm">
-            <thead className="sticky top-0 z-10">
-              <tr className="border-b border-zinc-800 bg-zinc-900">
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px' }}>
+        <div style={{ overflow: 'auto', border: '1px solid #27272a' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+            <thead>
+              <tr style={{ background: '#18181b' }}>
                 {columns.map((column) => (
                   <th
                     key={column}
-                    className="border-r border-zinc-800 px-4 py-3 text-left font-semibold text-zinc-400 whitespace-nowrap"
+                    style={{
+                      border: '1px solid #27272a',
+                      padding: '8px',
+                      textAlign: 'left',
+                      color: '#a1a1aa'
+                    }}
                   >
                     {column}
                   </th>
@@ -150,17 +158,17 @@ export default function Home() {
             </thead>
 
             <tbody>
-              {filteredRows.map((row, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-zinc-800 transition hover:bg-zinc-800/30"
-                >
-                  {columns.map((column) => (
+              {filteredRows.map((row, i) => (
+                <tr key={i}>
+                  {columns.map((col) => (
                     <td
-                      key={column}
-                      className="border-r border-zinc-800 px-4 py-3 text-zinc-200 whitespace-nowrap"
+                      key={col}
+                      style={{
+                        border: '1px solid #27272a',
+                        padding: '8px'
+                      }}
                     >
-                      {String(row[column] ?? '')}
+                      {String(row[col] ?? '')}
                     </td>
                   ))}
                 </tr>
@@ -168,19 +176,8 @@ export default function Home() {
             </tbody>
           </table>
         </div>
-      </main>
+      </div>
 
-      {/* FOOTER */}
-      <footer className="border-t border-zinc-800 bg-zinc-950">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-8 text-sm text-zinc-500 md:flex-row md:items-center md:justify-between">
-          <div>Архив 909 © 2025</div>
-
-          <div className="flex gap-6">
-            <span>Electronic Music Archive</span>
-            <span>Techno · Ambient · Minimal</span>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
