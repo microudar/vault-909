@@ -155,7 +155,17 @@ export default function SheetPage() {
             >
               {/* Артист + название */}
               <div style={{ fontSize: '15px', color: '#fff' }}>
-                {parsed.artists.join(', ')} — {parsed.title}
+                {parsed.artists.map((artist, i) => (
+  <span key={i}>
+    <a
+      href={`/artist/${artist.toLowerCase().replace(/\s+/g, '-')}`}
+      style={{ color: '#60a5fa', textDecoration: 'none' }}
+    >
+      {artist}
+    </a>
+    {i < parsed.artists.length - 1 && ', '}
+  </span>
+))} — {parsed.title}
                 {parsed.year && ` (${parsed.year})`}
               </div>
 
