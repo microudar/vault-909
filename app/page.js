@@ -3,6 +3,53 @@
 import { useEffect, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 
+// 🔥 ПАРСЕР РЕЛИЗА
+function parseRelease(text) {
+  if (!text) return {}
+
+  const match = text.match(/\[(.*?)\]/)
+
+  let label = ''
+  let catalog = ''
+
+  if (match) {
+    const inside = match[1].trim()
+
+    if (inside.includes('/')) {
+      const parts = inside.split('/')
+      label = parts[0]?.trim() || ''
+      catalog = parts[1]?.trim() || ''
+    } else {
+      catalog = inside
+    }
+  }
+
+  const cleaned = text.replace(/\[.*?\]/, '').trim()
+
+  const [artistPart, rest] = cleaned.split(' - ')
+
+  const artists = artistPart
+    ? artistPart.split(/[\/,&]/).map(a => a.trim()).filter(Boolean)
+    : []
+
+  let title = ''
+  let year = ''
+
+  if (rest) {
+    const parts = rest.trim().split(' ')
+    year = parts.pop()
+    title = parts.join(' ')
+  }
+
+  return {
+    artists,
+    title,
+    label,
+    catalog,
+    year,
+  }
+}
+
 export default function Home() {
   const [sheets, setSheets] = useState([])
   const [activeSheet, setActiveSheet] = useState('')
@@ -134,18 +181,30 @@ export default function Home() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {filteredRows.map((row, i) => {
             const text = Object.values(row).join(' ')
+            const parsed = parseRelease(text)
 
             return (
               <div
                 key={i}
                 style={{
-                  padding: '12px 14px',
+                  padding: '14px 16px',
                   border: '1px solid #27272a',
                   background: '#18181b',
-                  borderRadius: '8px'
+                  borderRadius: '10px'
                 }}
               >
-                {text}
+                <div style={{ fontSize: '15px', color: '#fff' }}>
+                  {parsed.artists.join(', ')} — {parsed.title}
+                  {parsed.year && ` (${parsed.year})`}
+                </div>
+
+                {(parsed.label || parsed.catalog) && (
+                  <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+                    {parsed.label}
+                    {parsed.label && parsed.catalog && ' / '}
+                    {parsed.catalog}
+                  </div>
+                )}
               </div>
             )
           })}
