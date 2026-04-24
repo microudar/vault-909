@@ -45,7 +45,9 @@ const restJoined = parts.join(' - ')
 
 // 🔥 чистим артиста от года
 const cleanArtistPart = artistPart
-  ? artistPart.replace(/\b\d{4}\b/g, '').trim()
+  ? artistPart
+      .replace(/\s*\b\d{4}\b$/, '') // 🔥 убираем год ТОЛЬКО в конце
+      .trim()
   : ''
 
 let artists = []
