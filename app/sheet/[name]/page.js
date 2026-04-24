@@ -84,7 +84,7 @@ export default function SheetPage() {
         }
 
         const sheet = workbook.Sheets[realName]
-        const data = XLSX.utils.sheet_to_json(sheet)
+        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
 
         setRows(data)
         setTitle(realName)
@@ -123,7 +123,9 @@ export default function SheetPage() {
       {/* Список релизов */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {filtered.map((row, i) => {
-          const text = Object.values(row).join(' ')
+          const text = Array.isArray(row)
+  ? row.join(' ')
+  : Object.values(row).join(' ')
           const parsed = parseRelease(text)
 
           return (
