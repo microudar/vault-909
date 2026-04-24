@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 
-// 🔥 ПАРСЕР РЕЛИЗА
+// 🔥 ПРАВИЛЬНЫЙ ПАРСЕР (НЕ ТЕРЯЕТ ДАННЫЕ)
 function parseRelease(text) {
   if (!text) return {}
 
@@ -26,7 +26,10 @@ function parseRelease(text) {
 
   const cleaned = text.replace(/\[.*?\]/, '').trim()
 
-  const [artistPart, rest] = cleaned.split(' - ')
+  // 🔥 ВАЖНО: разбиваем на все части
+  const parts = cleaned.split(' - ')
+  const artistPart = parts.shift()
+  const restJoined = parts.join(' - ')
 
   const artists = artistPart
     ? artistPart.split(/[\/,&]/).map(a => a.trim()).filter(Boolean)
@@ -35,10 +38,10 @@ function parseRelease(text) {
   let title = ''
   let year = ''
 
-  if (rest) {
-    const parts = rest.trim().split(' ')
-    year = parts.pop()
-    title = parts.join(' ')
+  if (restJoined) {
+    const words = restJoined.trim().split(' ')
+    year = words.pop()
+    title = words.join(' ')
   }
 
   return {
