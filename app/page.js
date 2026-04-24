@@ -58,6 +58,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
+      {/* HERO */}
       <div className="border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-16 lg:grid-cols-2">
           <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-2xl">
@@ -97,14 +98,15 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ВКЛАДКИ */}
       <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto max-w-7xl px-6 py-6">
-          <div className="mb-6 flex gap-2 overflow-x-auto border-b border-zinc-800 pb-0">
+          <div className="mb-6 flex gap-2 overflow-x-auto border-b border-zinc-800">
             {sheets.map((sheet) => (
               <a
                 key={sheet.name}
                 href={`/sheet/${sheet.name}`}
-                className="relative -mb-px rounded-t-xl border border-b-0 px-5 py-3 text-sm font-medium whitespace-nowrap transition border-transparent bg-zinc-950 text-zinc-500 hover:bg-zinc-900/50 hover:text-white"
+                className="relative -mb-px rounded-t-xl border border-b-0 border-zinc-800 bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-400 whitespace-nowrap transition hover:bg-zinc-800 hover:text-white"
               >
                 {sheet.name}
               </a>
@@ -113,6 +115,7 @@ export default function Home() {
         </div>
       </header>
 
+      {/* ТАБЛИЦА */}
       <main
         id="archive"
         className="mx-auto max-w-7xl px-6 py-6"
@@ -167,6 +170,7 @@ export default function Home() {
         </div>
       </main>
 
+      {/* FOOTER */}
       <footer className="border-t border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-8 text-sm text-zinc-500 md:flex-row md:items-center md:justify-between">
           <div>Архив 909 © 2025</div>
