@@ -7,7 +7,9 @@ import { useParams } from 'next/navigation'
 function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-')
 }
-
+const SHEET_LABELS = {
+  '1': 'M_nus',
+}
 function parseRelease(text) {
   if (!text) return {}
 
@@ -79,7 +81,10 @@ export default function LabelPage() {
           data.forEach(row => {
             const text = Array.isArray(row) ? row.join(' ') : ''
             const parsed = parseRelease(text)
-
+// 🔥 добавляем лейбл из листа, если нужно
+if (SHEET_LABELS[sheetName]) {
+  parsed.label = parsed.label || SHEET_LABELS[sheetName]
+}
             if (slugify(parsed.label) === slug) {
               all.push(parsed)
               setLabelName(parsed.label)
