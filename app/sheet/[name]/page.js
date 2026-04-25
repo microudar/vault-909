@@ -4,25 +4,17 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 slug для листов
-function slugify(text) {
-  return text.toLowerCase().replace(/\s+/g, '-')
-}
-
-// 🔥 slug для артистов (фикс +)
-function artistSlug(name) {
-  return name
+// 🔥 универсальный slug
+function normalizeSlug(text) {
+  return text
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/\+/g, 'plus')
+    .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-}
-
-// 🔥 slug для лейблов (фикс +)
-function labelSlug(name) {
-  return name
-    .toLowerCase()
-    .replace(/\+/g, 'plus')
-    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim()
 }
 
 // 🔥 привязка листов к лейблам
@@ -47,7 +39,6 @@ const SHEET_LABELS = {
   '18': 'L.I.E.S. (Long Island Electrical Systems)',
   '19': 'Stil Vor Talent',
   '20': 'Ovum Recordings',
-  '21': 'Wolf + Lamb Music',
   '22': 'Liebe*Detail Digital',
   '23': 'Systematic',
   '24': 'Dirtybird',
@@ -55,20 +46,17 @@ const SHEET_LABELS = {
   '26': 'Border Community',
 }
 
-// 🔥 парсер релиза
 function parseRelease(text) {
   if (!text) return {}
 
-  text = text.replace(/\[\[/g, '[')
-
+  text = text.replace(/\[+/g, '[')
   const match = text.match(/\[(.*?)\]/)
 
   let label = ''
   let catalog = ''
 
   if (match) {
-    const inside = match[1].replace('//', '/').trim()
-
+    const inside = match[1].replace(/\/+/g, '/').trim()
     if (inside.includes('/')) {
       const parts = inside.split('/')
       label = parts[0]?.trim() || ''
@@ -81,7 +69,7 @@ function parseRelease(text) {
   const cleaned = text.replace(/\[.*?\]/, '').trim()
   const parts = cleaned.split(' - ')
   const artistPart = parts.shift()
-  const restJoined = parts.join(' - ')
+  const rest = parts.join(' - ')
 
   const artists = artistPart
     ? artistPart
@@ -97,19 +85,13 @@ function parseRelease(text) {
   let title = ''
   let year = ''
 
-  if (restJoined) {
-    const words = restJoined.trim().split(' ')
+  if (rest) {
+    const words = rest.trim().split(' ')
     year = words.pop()
     title = words.join(' ')
   }
 
-  return {
-    artists,
-    title,
-    label,
-    catalog,
-    year,
-  }
+  return { artists, title, year, label, catalog }
 }
 
 export default function SheetPage() {
@@ -121,18 +103,15 @@ export default function SheetPage() {
 
   useEffect(() => {
     fetch('/music.xlsx')
-      .then((res) => res.arrayBuffer())
-      .then((buffer) => {
+      .then(res => res.arrayBuffer())
+      .then(buffer => {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
         const realName = workbook.SheetNames.find(
-          (n) => slugify(n) === name
+          n => normalizeSlug(n) === name
         )
 
-        if (!realName) {
-          console.log('Лист не найден:', name)
-          return
-        }
+        if (!realName) return
 
         const sheet = workbook.Sheets[realName]
         const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
@@ -142,108 +121,44 @@ export default function SheetPage() {
       })
   }, [name])
 
-  const filtered = rows.filter((row) =>
-    Object.values(row)
-      .join(' ')
-      .toLowerCase()
-      .includes(query.toLowerCase())
+  const filtered = rows.filter(row =>
+    Object.values(row).join(' ').toLowerCase().includes(query.toLowerCase())
   )
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
-      <button
-        onClick={() => window.location.href = '/'}
-        style={{
-          marginBottom: '20px',
-          padding: '8px 14px',
-          background: '#18181b',
-          border: '1px solid #27272a',
-          color: '#fff',
-          cursor: 'pointer'
-        }}
-      >
-        ← Назад
-      </button>
 
-      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
-        {title || name}
-      </h1>
+      <button onClick={() => window.location.href = '/'}>← Назад</button>
 
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Поиск..."
-        style={{
-          padding: '10px',
-          marginBottom: '20px',
-          background: '#18181b',
-          border: '1px solid #27272a',
-          color: '#fff'
-        }}
-      />
+      <h1>{title || name}</h1>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {filtered.map((row, i) => {
-          const text = Array.isArray(row)
-            ? row.join(' ')
-            : Object.values(row).join(' ')
+      <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Поиск..." />
 
-          const parsed = parseRelease(text)
+      {filtered.map((row, i) => {
+        const text = Array.isArray(row) ? row.join(' ') : Object.values(row).join(' ')
+        const parsed = parseRelease(text)
 
-          // 🔥 применяем лейбл из листа
-          if (SHEET_LABELS[name]) {
-            parsed.label = parsed.label || SHEET_LABELS[name]
-          }
+        if (SHEET_LABELS[name]) {
+          parsed.label = parsed.label || SHEET_LABELS[name]
+        }
 
-          return (
-            <div
-              key={i}
-              style={{
-                padding: '14px 16px',
-                border: '1px solid #27272a',
-                background: '#18181b',
-                borderRadius: '10px'
-              }}
-            >
-              {/* Артисты */}
-              <div style={{ fontSize: '15px', color: '#fff' }}>
-                {parsed.artists.map((artist, i) => (
-                  <span key={i}>
-                    <a
-                      href={`/artist/${artistSlug(artist)}`}
-                      style={{ color: '#60a5fa', textDecoration: 'none' }}
-                    >
-                      {artist}
-                    </a>
-                    {i < parsed.artists.length - 1 && ', '}
-                  </span>
-                ))} — {parsed.title}
-                {parsed.year && ` (${parsed.year})`}
-              </div>
+        return (
+          <div key={i}>
+            {parsed.artists.map((artist, i) => (
+              <a key={i} href={`/artist/${normalizeSlug(artist)}`}>{artist}</a>
+            ))} — {parsed.title} ({parsed.year})
 
-              {/* Лейбл */}
-              {(parsed.label || parsed.catalog) && (
-                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-                  
-                  {parsed.label && (
-                    <a
-                      href={`/label/${labelSlug(parsed.label)}`}
-                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
-                    >
-                      {parsed.label}
-                    </a>
-                  )}
-
-                  {parsed.label && parsed.catalog && ' / '}
-                  {parsed.catalog}
-
-                </div>
+            <div>
+              {parsed.label && (
+                <a href={`/label/${normalizeSlug(parsed.label)}`}>
+                  {parsed.label}
+                </a>
               )}
+              {parsed.catalog && ` / ${parsed.catalog}`}
             </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
