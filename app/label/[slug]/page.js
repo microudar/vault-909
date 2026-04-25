@@ -39,6 +39,7 @@ const SHEET_LABELS = {
   '18': 'L.I.E.S. (Long Island Electrical Systems)',
   '19': 'Stil Vor Talent',
   '20': 'Ovum Recordings',
+  '21': 'Wolf + Lamb Music',
   '22': 'Liebe*Detail Digital',
   '23': 'Systematic',
   '24': 'Dirtybird',
