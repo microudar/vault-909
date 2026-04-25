@@ -4,9 +4,12 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
+// slug для URL
 function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-')
 }
+
+// 🔥 привязка листов к лейблам
 const SHEET_LABELS = {
   '1': 'M_nus',
   '2': 'Plus 8 Records Ltd.',
@@ -34,10 +37,12 @@ const SHEET_LABELS = {
   '25': 'Traum Schallplatten',
   '26': 'Border Community',
 }
+
+// 🔥 парсер
 function parseRelease(text) {
   if (!text) return {}
 
-  text = text.replace(/\[\[/g, '[')
+  text = text.replace(/\[+/g, '[')
 
   const match = text.match(/\[(.*?)\]/)
 
@@ -45,7 +50,7 @@ function parseRelease(text) {
   let catalog = ''
 
   if (match) {
-    const inside = match[1].replace('//', '/').trim()
+    const inside = match[1].replace(/\/+/g, '/').trim()
 
     if (inside.includes('/')) {
       const parts = inside.split('/')
@@ -59,7 +64,7 @@ function parseRelease(text) {
   const cleaned = text.replace(/\[.*?\]/, '').trim()
   const parts = cleaned.split(' - ')
   const artistPart = parts.shift()
-  const restJoined = parts.join(' - ')
+  const rest = parts.join(' - ')
 
   const artists = artistPart
     ? artistPart
@@ -75,8 +80,8 @@ function parseRelease(text) {
   let title = ''
   let year = ''
 
-  if (restJoined) {
-    const words = restJoined.trim().split(' ')
+  if (rest) {
+    const words = rest.trim().split(' ')
     year = words.pop()
     title = words.join(' ')
   }
@@ -105,24 +110,45 @@ export default function LabelPage() {
           data.forEach(row => {
             const text = Array.isArray(row) ? row.join(' ') : ''
             const parsed = parseRelease(text)
-// 🔥 добавляем лейбл из листа, если нужно
-if (SHEET_LABELS[sheetName]) {
-  parsed.label = parsed.label || SHEET_LABELS[sheetName]
-}
-            if (slugify(parsed.label) === slug) {
+
+            // 🔥 добавляем лейбл из листа
+            if (SHEET_LABELS[sheetName]) {
+              parsed.label = parsed.label || SHEET_LABELS[sheetName]
+            }
+
+            // 🔥 фильтр + защита от дублей
+            if (
+              slugify(parsed.label) === slug &&
+              !all.some(
+                r => r.title === parsed.title && r.year === parsed.year
+              )
+            ) {
               all.push(parsed)
-              setLabelName(parsed.label)
+
+              // 🔥 один раз устанавливаем имя
+              if (!labelName) {
+                setLabelName(parsed.label)
+              }
             }
           })
         })
+
+        // 🔥 сортировка по году (новые сверху)
+        all.sort((a, b) => b.year - a.year)
 
         setReleases(all)
       })
   }, [slug])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#09090b',
+        color: '#fff',
+        padding: '40px',
+      }}
+    >
       <button
         onClick={() => window.history.back()}
         style={{
@@ -131,7 +157,7 @@ if (SHEET_LABELS[sheetName]) {
           background: '#18181b',
           border: '1px solid #27272a',
           color: '#fff',
-          cursor: 'pointer'
+          cursor: 'pointer',
         }}
       >
         ← Назад
@@ -141,7 +167,13 @@ if (SHEET_LABELS[sheetName]) {
         {labelName || slug}
       </h1>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+        }}
+      >
         {releases.map((r, i) => (
           <div
             key={i}
@@ -149,14 +181,21 @@ if (SHEET_LABELS[sheetName]) {
               padding: '14px',
               background: '#18181b',
               border: '1px solid #27272a',
-              borderRadius: '10px'
+              borderRadius: '10px',
             }}
           >
             <div>
               {r.artists.join(', ')} — {r.title} ({r.year})
             </div>
-            <div style={{ fontSize: '13px', color: '#71717a' }}>
-              {r.label} {r.catalog && `/ ${r.catalog}`}
+
+            <div
+              style={{
+                fontSize: '13px',
+                color: '#71717a',
+              }}
+            >
+              {r.label}
+              {r.catalog && ` / ${r.catalog}`}
             </div>
           </div>
         ))}
