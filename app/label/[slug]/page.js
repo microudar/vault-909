@@ -10,6 +10,20 @@ function slugify(text) {
 const SHEET_LABELS = {
   '1': 'M_nus',
   '2': 'Plus 8 Records Ltd.',
+  '3': 'Mobilee',
+  '4': 'Delsin',
+  '5': 'Ostgut Ton',
+  '6': 'Blueprint',
+  '7': 'Echocord',
+  '8': 'Semantica',
+  '9': 'Prologue',
+  '10': 'Sandwell District',
+  '11': 'Stroboscopic Artefacts',
+  '12': 'Tresor',
+  '13': 'Music Man Records',
+  '14': 'Synewave',
+  '15': 'Modern Love',
+  '16': '50Weapons',
 }
 function parseRelease(text) {
   if (!text) return {}
