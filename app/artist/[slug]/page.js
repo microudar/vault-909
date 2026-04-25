@@ -4,17 +4,15 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-function artistSlug(name) {
-  return name
+function normalizeSlug(text) {
+  return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // 🔥 убираем ü ö ä
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/\+/g, 'plus')
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-}
-
-function slugify(text) {
-  return text.toLowerCase().replace(/\s+/g, '-')
 }
 
 function parseRelease(text) {
@@ -82,12 +80,12 @@ export default function ArtistPage() {
             const text = Array.isArray(row) ? row.join(' ') : ''
             const parsed = parseRelease(text)
 
-           if (parsed.artists.some(a => artistSlug(a) === slug)) {
-  all.push(parsed)
+            if (parsed.artists.some(a => normalizeSlug(a) === slug)) {
+              all.push(parsed)
 
-  const found = parsed.artists.find(a => artistSlug(a) === slug)
-  if (found && !name) setName(found)
-}
+              const found = parsed.artists.find(a => normalizeSlug(a) === slug)
+              if (found && !name) setName(found)
+            }
           })
         })
 
@@ -96,46 +94,17 @@ export default function ArtistPage() {
   }, [slug])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
-      <button
-        onClick={() => window.history.back()}
-        style={{
-          marginBottom: '20px',
-          padding: '8px 14px',
-          background: '#18181b',
-          border: '1px solid #27272a',
-          color: '#fff',
-          cursor: 'pointer'
-        }}
-      >
-        ← Назад
-      </button>
+    <div>
+      <button onClick={() => window.history.back()}>← Назад</button>
 
-      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
-        {name || slug}
-      </h1>
+      <h1>{name || slug}</h1>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {releases.map((r, i) => (
-          <div
-            key={i}
-            style={{
-              padding: '14px',
-              background: '#18181b',
-              border: '1px solid #27272a',
-              borderRadius: '10px'
-            }}
-          >
-            <div>
-              {r.artists.join(', ')} — {r.title} ({r.year})
-            </div>
-            <div style={{ fontSize: '13px', color: '#71717a' }}>
-              {r.label} {r.catalog && `/ ${r.catalog}`}
-            </div>
-          </div>
-        ))}
-      </div>
+      {releases.map((r, i) => (
+        <div key={i}>
+          {r.artists.join(', ')} — {r.title} ({r.year})
+          <div>{r.label} {r.catalog && `/ ${r.catalog}`}</div>
+        </div>
+      ))}
     </div>
   )
 }
