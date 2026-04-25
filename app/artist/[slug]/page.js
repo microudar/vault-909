@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
+// 🔥 тот же slug
 function normalizeSlug(text) {
   return text
     .toLowerCase()
@@ -18,7 +19,7 @@ function normalizeSlug(text) {
 function parseRelease(text) {
   if (!text) return {}
 
-  text = text.replace(/\[+/g, '[')
+  text = text.replace(/\[\[/g, '[')
 
   const match = text.match(/\[(.*?)\]/)
 
@@ -43,14 +44,21 @@ function parseRelease(text) {
   const rest = parts.join(' - ')
 
   const artists = artistPart
-    ? artistPart.split(/[\/,&]/).map(a => a.trim())
+    ? artistPart
+        .replace(/\b[Vv]s\.?\b/g, ',')
+        .replace(/\b[Ff]eat\.?\b/g, ',')
+        .replace(/\b[Ff]t\.?\b/g, ',')
+        .replace(/,\s*\./g, ',')
+        .split(/[\/,&,]/)
+        .map(a => a.trim().replace(/^\.+/, ''))
+        .filter(Boolean)
     : []
 
   let title = ''
   let year = ''
 
   if (rest) {
-    const words = rest.split(' ')
+    const words = rest.trim().split(' ')
     year = words.pop()
     title = words.join(' ')
   }
@@ -94,17 +102,67 @@ export default function ArtistPage() {
   }, [slug])
 
   return (
-    <div>
-      <button onClick={() => window.history.back()}>← Назад</button>
+    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
+      
+      <button
+        onClick={() => window.history.back()}
+        style={{
+          marginBottom: '20px',
+          padding: '8px 14px',
+          background: '#18181b',
+          border: '1px solid #27272a',
+          color: '#fff',
+          cursor: 'pointer'
+        }}
+      >
+        ← Назад
+      </button>
 
-      <h1>{name || slug}</h1>
+      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
+        {name || slug}
+      </h1>
 
-      {releases.map((r, i) => (
-        <div key={i}>
-          {r.artists.join(', ')} — {r.title} ({r.year})
-          <div>{r.label} {r.catalog && `/ ${r.catalog}`}</div>
-        </div>
-      ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {releases.map((r, i) => (
+          <div
+            key={i}
+            style={{
+              padding: '14px 16px',
+              border: '1px solid #27272a',
+              background: '#18181b',
+              borderRadius: '10px'
+            }}
+          >
+            <div>
+              {r.artists.map((artist, i) => (
+                <span key={i}>
+                  <a
+                    href={`/artist/${normalizeSlug(artist)}`}
+                    style={{ color: '#60a5fa', textDecoration: 'none' }}
+                  >
+                    {artist}
+                  </a>
+                  {i < r.artists.length - 1 && ', '}
+                </span>
+              ))}{' '}
+              — {r.title} ({r.year})
+            </div>
+
+            <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+              {r.label && (
+                <a
+                  href={`/label/${normalizeSlug(r.label)}`}
+                  style={{ color: '#a1a1aa', textDecoration: 'none' }}
+                >
+                  {r.label}
+                </a>
+              )}
+              {r.label && r.catalog && ' / '}
+              {r.catalog}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
