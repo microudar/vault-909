@@ -13,6 +13,8 @@ function slugify(text) {
 function artistSlug(name) {
   return name
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // 🔥 фикс ü ö ä
     .replace(/\+/g, 'plus')
     .replace(/\s+/g, '-')
 }
@@ -21,6 +23,8 @@ function artistSlug(name) {
 function labelSlug(name) {
   return name
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/\+/g, 'plus')
     .replace(/\s+/g, '-')
 }
