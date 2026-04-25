@@ -177,13 +177,24 @@ export default function SheetPage() {
               </div>
 
               {/* Лейбл */}
-              {(parsed.label || parsed.catalog) && (
-                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-                  {parsed.label}
-                  {parsed.label && parsed.catalog && ' / '}
-                  {parsed.catalog}
-                </div>
-              )}
+             {(parsed.label || parsed.catalog) && (
+  <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+    
+    {parsed.label && (
+      <a
+        href={`/label/${parsed.label.toLowerCase().replace(/\s+/g, '-')}`}
+        style={{ color: '#a1a1aa', textDecoration: 'none' }}
+      >
+        {parsed.label}
+      </a>
+    )}
+
+    {parsed.label && parsed.catalog && ' / '}
+
+    {parsed.catalog}
+
+  </div>
+)}
             </div>
           )
         })}
