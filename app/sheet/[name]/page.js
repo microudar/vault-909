@@ -42,12 +42,13 @@ text = text.replace(/\[\[/g, '[')
   const restJoined = parts.join(' - ')
 
   const artists = artistPart
-    ? artistPart
+  ? artistPart
       .replace(/\b[Vv]s\.?\b/g, ',')
       .replace(/\b[Ff]eat\.?\b/g, ',')
       .replace(/\b[Ff]t\.?\b/g, ',')
+      .replace(/,\s*\./g, ',')   // 🔥 убираем ", ." после замены
       .split(/[\/,&,]/)
-      .map(a => a.trim())
+      .map(a => a.trim().replace(/^\.+/, '')) // 🔥 убираем точку ТОЛЬКО в начале
       .filter(Boolean)
   : []
 
