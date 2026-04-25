@@ -80,12 +80,12 @@ export default function ArtistPage() {
             const text = Array.isArray(row) ? row.join(' ') : ''
             const parsed = parseRelease(text)
 
-            parsed.artists.forEach(artist => {
-              if (slugify(artist) === slug) {
-                all.push(parsed)
-                setName(artist)
-              }
-            })
+           parsed.artists.forEach(artist => {
+  if (artistSlug(artist) === slug) {
+    all.push(parsed)
+    setName(artist)
+  }
+})
           })
         })
 
