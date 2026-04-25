@@ -13,6 +13,8 @@ function slugify(text) {
 function labelSlug(name) {
   return name
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // 🔥 убираем ü ö ä
     .replace(/\+/g, 'plus')
     .replace(/\s+/g, '-')
 }
