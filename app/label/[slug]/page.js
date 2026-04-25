@@ -4,9 +4,17 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// slug для URL
+// 🔥 slug для листов (обычный)
 function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-')
+}
+
+// 🔥 slug для лейблов (фикс +)
+function labelSlug(name) {
+  return name
+    .toLowerCase()
+    .replace(/\+/g, 'plus')
+    .replace(/\s+/g, '-')
 }
 
 // 🔥 привязка листов к лейблам
@@ -116,16 +124,15 @@ export default function LabelPage() {
               parsed.label = parsed.label || SHEET_LABELS[sheetName]
             }
 
-            // 🔥 фильтр + защита от дублей
+            // 🔥 главный фикс (labelSlug)
             if (
-              slugify(parsed.label) === slug &&
+              labelSlug(parsed.label) === slug &&
               !all.some(
                 r => r.title === parsed.title && r.year === parsed.year
               )
             ) {
               all.push(parsed)
 
-              // 🔥 один раз устанавливаем имя
               if (!labelName) {
                 setLabelName(parsed.label)
               }
@@ -133,7 +140,7 @@ export default function LabelPage() {
           })
         })
 
-        // 🔥 сортировка по году (новые сверху)
+        // 🔥 сортировка
         all.sort((a, b) => b.year - a.year)
 
         setReleases(all)
@@ -167,13 +174,7 @@ export default function LabelPage() {
         {labelName || slug}
       </h1>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-        }}
-      >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {releases.map((r, i) => (
           <div
             key={i}
@@ -188,12 +189,7 @@ export default function LabelPage() {
               {r.artists.join(', ')} — {r.title} ({r.year})
             </div>
 
-            <div
-              style={{
-                fontSize: '13px',
-                color: '#71717a',
-              }}
-            >
+            <div style={{ fontSize: '13px', color: '#71717a' }}>
               {r.label}
               {r.catalog && ` / ${r.catalog}`}
             </div>
