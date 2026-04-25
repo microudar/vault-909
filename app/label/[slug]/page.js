@@ -24,6 +24,15 @@ const SHEET_LABELS = {
   '14': 'Synewave',
   '15': 'Modern Love',
   '16': '50Weapons',
+  '17': 'Downwards',
+  '18': 'L.I.E.S. (Long Island Electrical Systems)',
+  '19': 'Stil Vor Talent',
+  '20': 'Ovum Recordings',
+  '22': 'Liebe*Detail Digital',
+  '23': 'Systematic',
+  '24': 'Dirtybird',
+  '25': 'Traum Schallplatten',
+  '26': 'Border Community',
 }
 function parseRelease(text) {
   if (!text) return {}
