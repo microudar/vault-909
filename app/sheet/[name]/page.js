@@ -12,6 +12,7 @@ function slugify(text) {
 }
 const SHEET_LABELS = {
   '1': 'M_nus',
+  '2': 'Plus 8 Records Ltd.',
 }
 // 🔥 парсер релиза
 function parseRelease(text) {
