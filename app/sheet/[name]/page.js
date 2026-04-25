@@ -42,8 +42,14 @@ text = text.replace(/\[\[/g, '[')
   const restJoined = parts.join(' - ')
 
   const artists = artistPart
-    ? artistPart.split(/[\/,&]/).map(a => a.trim()).filter(Boolean)
-    : []
+    ? artistPart
+      .replace(/\b[Vv]s\.?\b/g, ',')
+      .replace(/\b[Ff]eat\.?\b/g, ',')
+      .replace(/\b[Ff]t\.?\b/g, ',')
+      .split(/[\/,&,]/)
+      .map(a => a.trim())
+      .filter(Boolean)
+  : []
 
   let title = ''
   let year = ''
