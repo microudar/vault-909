@@ -4,12 +4,20 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 slug функция
+// 🔥 slug для лейблов и листов
 function slugify(text) {
-  return text
+  return text.toLowerCase().replace(/\s+/g, '-')
+}
+
+// 🔥 slug для артистов (фикс +)
+function artistSlug(name) {
+  return name
     .toLowerCase()
+    .replace(/\+/g, 'plus')
     .replace(/\s+/g, '-')
 }
+
+// 🔥 привязка листов к лейблам
 const SHEET_LABELS = {
   '1': 'M_nus',
   '2': 'Plus 8 Records Ltd.',
@@ -37,20 +45,20 @@ const SHEET_LABELS = {
   '25': 'Traum Schallplatten',
   '26': 'Border Community',
 }
+
 // 🔥 парсер релиза
 function parseRelease(text) {
   if (!text) return {}
-// 🔥 чистим двойные скобки
-text = text.replace(/\[\[/g, '[')
+
+  text = text.replace(/\[\[/g, '[')
+
   const match = text.match(/\[(.*?)\]/)
 
   let label = ''
   let catalog = ''
 
   if (match) {
-    const inside = match[1]
-  .replace('//', '/')
-  .trim()
+    const inside = match[1].replace('//', '/').trim()
 
     if (inside.includes('/')) {
       const parts = inside.split('/')
@@ -62,21 +70,20 @@ text = text.replace(/\[\[/g, '[')
   }
 
   const cleaned = text.replace(/\[.*?\]/, '').trim()
-
   const parts = cleaned.split(' - ')
   const artistPart = parts.shift()
   const restJoined = parts.join(' - ')
 
   const artists = artistPart
-  ? artistPart
-      .replace(/\b[Vv]s\.?\b/g, ',')
-      .replace(/\b[Ff]eat\.?\b/g, ',')
-      .replace(/\b[Ff]t\.?\b/g, ',')
-      .replace(/,\s*\./g, ',')   // 🔥 убираем ", ." после замены
-      .split(/[\/,&,]/)
-      .map(a => a.trim().replace(/^\.+/, '')) // 🔥 убираем точку ТОЛЬКО в начале
-      .filter(Boolean)
-  : []
+    ? artistPart
+        .replace(/\b[Vv]s\.?\b/g, ',')
+        .replace(/\b[Ff]eat\.?\b/g, ',')
+        .replace(/\b[Ff]t\.?\b/g, ',')
+        .replace(/,\s*\./g, ',')
+        .split(/[\/,&,]/)
+        .map(a => a.trim().replace(/^\.+/, ''))
+        .filter(Boolean)
+    : []
 
   let title = ''
   let year = ''
@@ -109,7 +116,6 @@ export default function SheetPage() {
       .then((buffer) => {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
-        // 🔥 ищем реальное имя листа
         const realName = workbook.SheetNames.find(
           (n) => slugify(n) === name
         )
@@ -136,25 +142,25 @@ export default function SheetPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
+      
       <button
-      onClick={() => window.location.href = '/'}
-      style={{
-        marginBottom: '20px',
-        padding: '8px 14px',
-        background: '#18181b',
-        border: '1px solid #27272a',
-        color: '#fff',
-        cursor: 'pointer'
-      }}
-    >
-      ← Назад
-    </button>
-      {/* Заголовок */}
+        onClick={() => window.location.href = '/'}
+        style={{
+          marginBottom: '20px',
+          padding: '8px 14px',
+          background: '#18181b',
+          border: '1px solid #27272a',
+          color: '#fff',
+          cursor: 'pointer'
+        }}
+      >
+        ← Назад
+      </button>
+
       <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
         {title || name}
       </h1>
 
-      {/* Поиск */}
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -168,16 +174,19 @@ export default function SheetPage() {
         }}
       />
 
-      {/* Список релизов */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {filtered.map((row, i) => {
           const text = Array.isArray(row)
-  ? row.join(' ')
-  : Object.values(row).join(' ')
+            ? row.join(' ')
+            : Object.values(row).join(' ')
+
           const parsed = parseRelease(text)
-if (SHEET_LABELS[name]) {
-  parsed.label = SHEET_LABELS[name]
-}
+
+          // 🔥 применяем лейбл из листа
+          if (SHEET_LABELS[name]) {
+            parsed.label = parsed.label || SHEET_LABELS[name]
+          }
+
           return (
             <div
               key={i}
@@ -188,46 +197,42 @@ if (SHEET_LABELS[name]) {
                 borderRadius: '10px'
               }}
             >
-              {/* Артист + название */}
               <div style={{ fontSize: '15px', color: '#fff' }}>
                 {parsed.artists.map((artist, i) => (
-  <span key={i}>
-    <a
-      href={`/artist/${artist.toLowerCase().replace(/\s+/g, '-')}`}
-      style={{ color: '#60a5fa', textDecoration: 'none' }}
-    >
-      {artist}
-    </a>
-    {i < parsed.artists.length - 1 && ', '}
-  </span>
-))} — {parsed.title}
+                  <span key={i}>
+                    <a
+                      href={`/artist/${artistSlug(artist)}`}
+                      style={{ color: '#60a5fa', textDecoration: 'none' }}
+                    >
+                      {artist}
+                    </a>
+                    {i < parsed.artists.length - 1 && ', '}
+                  </span>
+                ))} — {parsed.title}
                 {parsed.year && ` (${parsed.year})`}
               </div>
 
-              {/* Лейбл */}
-             {(parsed.label || parsed.catalog) && (
-  <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-    
-    {parsed.label && (
-      <a
-        href={`/label/${parsed.label.toLowerCase().replace(/\s+/g, '-')}`}
-        style={{ color: '#a1a1aa', textDecoration: 'none' }}
-      >
-        {parsed.label}
-      </a>
-    )}
+              {(parsed.label || parsed.catalog) && (
+                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+                  
+                  {parsed.label && (
+                    <a
+                      href={`/label/${slugify(parsed.label)}`}
+                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
+                    >
+                      {parsed.label}
+                    </a>
+                  )}
 
-    {parsed.label && parsed.catalog && ' / '}
+                  {parsed.label && parsed.catalog && ' / '}
+                  {parsed.catalog}
 
-    {parsed.catalog}
-
-  </div>
-)}
+                </div>
+              )}
             </div>
           )
         })}
       </div>
-
     </div>
   )
 }
