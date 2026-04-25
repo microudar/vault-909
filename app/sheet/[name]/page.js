@@ -4,13 +4,21 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 slug для лейблов и листов
+// 🔥 slug для листов
 function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-')
 }
 
 // 🔥 slug для артистов (фикс +)
 function artistSlug(name) {
+  return name
+    .toLowerCase()
+    .replace(/\+/g, 'plus')
+    .replace(/\s+/g, '-')
+}
+
+// 🔥 slug для лейблов (фикс +)
+function labelSlug(name) {
   return name
     .toLowerCase()
     .replace(/\+/g, 'plus')
@@ -197,6 +205,7 @@ export default function SheetPage() {
                 borderRadius: '10px'
               }}
             >
+              {/* Артисты */}
               <div style={{ fontSize: '15px', color: '#fff' }}>
                 {parsed.artists.map((artist, i) => (
                   <span key={i}>
@@ -212,12 +221,13 @@ export default function SheetPage() {
                 {parsed.year && ` (${parsed.year})`}
               </div>
 
+              {/* Лейбл */}
               {(parsed.label || parsed.catalog) && (
                 <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
                   
                   {parsed.label && (
                     <a
-                      href={`/label/${slugify(parsed.label)}`}
+                      href={`/label/${labelSlug(parsed.label)}`}
                       style={{ color: '#a1a1aa', textDecoration: 'none' }}
                     >
                       {parsed.label}
