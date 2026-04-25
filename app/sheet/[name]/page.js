@@ -136,42 +136,102 @@ export default function SheetPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
       
-      <button onClick={() => window.location.href = '/'}>← Назад</button>
+      {/* 🔙 кнопка */}
+      <button
+        onClick={() => window.location.href = '/'}
+        style={{
+          marginBottom: '20px',
+          padding: '8px 14px',
+          background: '#18181b',
+          border: '1px solid #27272a',
+          color: '#fff',
+          cursor: 'pointer'
+        }}
+      >
+        ← Назад
+      </button>
 
-      <h1>{title || name}</h1>
+      {/* заголовок */}
+      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
+        {title || name}
+      </h1>
 
-      <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Поиск..." />
+      {/* поиск */}
+      <input
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="Поиск..."
+        style={{
+          padding: '10px',
+          marginBottom: '20px',
+          background: '#18181b',
+          border: '1px solid #27272a',
+          color: '#fff'
+        }}
+      />
 
-      <div>
+      {/* список */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {filtered.map((row, i) => {
-          const text = Array.isArray(row) ? row.join(' ') : Object.values(row).join(' ')
+          const text = Array.isArray(row)
+            ? row.join(' ')
+            : Object.values(row).join(' ')
+
           const parsed = parseRelease(text)
 
           if (SHEET_LABELS[name]) {
             parsed.label = parsed.label || SHEET_LABELS[name]
           }
 
+          if (!parsed.title) return null
+
           return (
-            <div key={i}>
-              <div>
+            <div
+              key={i}
+              style={{
+                padding: '14px 16px',
+                border: '1px solid #27272a',
+                background: '#18181b',
+                borderRadius: '10px'
+              }}
+            >
+              {/* артисты */}
+              <div style={{ fontSize: '15px' }}>
                 {parsed.artists.map((artist, i) => (
                   <span key={i}>
-                    <a href={`/artist/${normalizeSlug(artist)}`}>
+                    <a
+                      href={`/artist/${normalizeSlug(artist)}`}
+                      style={{
+                        color: '#60a5fa',
+                        textDecoration: 'none'
+                      }}
+                    >
                       {artist}
                     </a>
                     {i < parsed.artists.length - 1 && ', '}
                   </span>
-                ))} — {parsed.title} ({parsed.year})
+                ))}{' '}
+                — {parsed.title} ({parsed.year})
               </div>
 
-              <div>
-                {parsed.label && (
-                  <a href={`/label/${normalizeSlug(parsed.label)}`}>
-                    {parsed.label}
-                  </a>
-                )}
-                {parsed.catalog && ` / ${parsed.catalog}`}
-              </div>
+              {/* лейбл */}
+              {(parsed.label || parsed.catalog) && (
+                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+                  {parsed.label && (
+                    <a
+                      href={`/label/${normalizeSlug(parsed.label)}`}
+                      style={{
+                        color: '#a1a1aa',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      {parsed.label}
+                    </a>
+                  )}
+                  {parsed.label && parsed.catalog && ' / '}
+                  {parsed.catalog}
+                </div>
+              )}
             </div>
           )
         })}
