@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
+function artistSlug(name) {
+  return name
+    .toLowerCase()
+    .replace(/\+/g, 'plus')
+    .replace(/\s+/g, '-')
+}
+
 function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-')
 }
