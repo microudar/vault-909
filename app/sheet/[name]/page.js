@@ -10,7 +10,9 @@ function slugify(text) {
     .toLowerCase()
     .replace(/\s+/g, '-')
 }
-
+const SHEET_LABELS = {
+  '1': 'M_nus',
+}
 // 🔥 парсер релиза
 function parseRelease(text) {
   if (!text) return {}
@@ -149,7 +151,9 @@ export default function SheetPage() {
   ? row.join(' ')
   : Object.values(row).join(' ')
           const parsed = parseRelease(text)
-
+if (SHEET_LABELS[name]) {
+  parsed.label = SHEET_LABELS[name]
+}
           return (
             <div
               key={i}
