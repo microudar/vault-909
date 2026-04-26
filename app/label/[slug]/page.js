@@ -16,6 +16,11 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
+function extractNumber(str) {
+  const match = str?.match(/\d+/)
+  return match ? Number(match[0]) : 0
+}
+
 function getReleaseKey(r) {
   return [
     r.artists.join(','),
