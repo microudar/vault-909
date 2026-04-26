@@ -16,6 +16,16 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
+function getReleaseKey(r) {
+  return [
+    r.artists.join(','),
+    r.title,
+    r.year,
+    r.label,
+    r.catalog
+  ].join('|').toLowerCase()
+}
+
 function parseRelease(text) {
   if (!text) return {}
 
@@ -79,6 +89,7 @@ export default function ArtistPage() {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
         let all = []
+const seen = new Set()
 
         workbook.SheetNames.forEach(sheetName => {
           const sheet = workbook.Sheets[sheetName]
@@ -89,7 +100,12 @@ export default function ArtistPage() {
             const parsed = parseRelease(text)
 
             if (parsed.artists.some(a => normalizeSlug(a) === slug)) {
-              all.push(parsed)
+              const key = getReleaseKey(parsed)
+
+if (!seen.has(key)) {
+  seen.add(key)
+  all.push(parsed)
+}
 
               const found = parsed.artists.find(a => normalizeSlug(a) === slug)
               if (found && !name) setName(found)
