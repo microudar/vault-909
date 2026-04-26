@@ -1,5 +1,6 @@
 'use client'
 
+import Header from '@/components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
@@ -135,7 +136,7 @@ export default function SheetPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
+      <Header />
       {/* 🔙 кнопка */}
       <button
         onClick={() => window.location.href = '/'}
