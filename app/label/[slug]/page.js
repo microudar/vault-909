@@ -146,6 +146,13 @@ if (!seen.has(key)) {
           })
         })
 
+        all.sort((a, b) => {
+  const numA = extractNumber(a.catalog)
+  const numB = extractNumber(b.catalog)
+
+  return numA - numB
+})
+
         setReleases(all)
       })
   }, [slug])
