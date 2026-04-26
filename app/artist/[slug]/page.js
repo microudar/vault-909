@@ -105,6 +105,8 @@ if (!seen.has(key)) {
   all.push(parsed)
 }
 
+              all.sort((a, b) => Number(b.year) - Number(a.year))
+
               const found = parsed.artists.find(a => normalizeSlug(a) === slug)
               if (found && !name) setName(found)
             }
