@@ -151,23 +151,27 @@ if (!seen.has(key)) {
           })
         })
 
-      all.sort((a, b) => {
+     all.sort((a, b) => {
   const catA = (a.catalog || '').toLowerCase()
   const catB = (b.catalog || '').toLowerCase()
 
-  // число
+  const getSeries = (str) => {
+    if (str.includes('cd')) return 2
+    if (str.includes('v')) return 1
+    return 0
+  }
+
+  const seriesA = getSeries(catA)
+  const seriesB = getSeries(catB)
+
+  if (seriesA !== seriesB) {
+    return seriesA - seriesB
+  }
+
   const numA = extractNumber(catA)
   const numB = extractNumber(catB)
 
-  if (numA !== numB) {
-    return numA - numB
-  }
-
-  // если числа равны → сравниваем остаток (cd, lp и т.д.)
-  const suffixA = catA.replace(/\d+/g, '').trim()
-  const suffixB = catB.replace(/\d+/g, '').trim()
-
-  return suffixA.localeCompare(suffixB)
+  return numA - numB
 })
 
         setReleases(all)
