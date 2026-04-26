@@ -1,5 +1,6 @@
 'use client'
 
+import Header from '@/components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
@@ -176,7 +177,7 @@ if (!seen.has(key)) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
+      <Header />
       {/* кнопка */}
       <button
         onClick={() => window.history.back()}
