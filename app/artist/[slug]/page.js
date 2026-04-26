@@ -20,7 +20,7 @@ function getReleaseKey(r) {
   return [
     r.artists.join(','),
     r.title,
-    r.year,
+    r.year
   ].join('|').toLowerCase()
 }
 
