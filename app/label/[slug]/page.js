@@ -151,9 +151,19 @@ if (!seen.has(key)) {
           })
         })
 
-        all.sort((a, b) => {
-  const numA = extractNumber(a.catalog)
-  const numB = extractNumber(b.catalog)
+       all.sort((a, b) => {
+  const catA = (a.catalog || '').toLowerCase()
+  const catB = (b.catalog || '').toLowerCase()
+
+  const baseA = catA.replace(/\d+/g, '').trim()
+  const baseB = catB.replace(/\d+/g, '').trim()
+
+  if (baseA !== baseB) {
+    return baseA.localeCompare(baseB)
+  }
+
+  const numA = extractNumber(catA)
+  const numB = extractNumber(catB)
 
   return numA - numB
 })
