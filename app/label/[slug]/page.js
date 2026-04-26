@@ -151,21 +151,23 @@ if (!seen.has(key)) {
           })
         })
 
-       all.sort((a, b) => {
+      all.sort((a, b) => {
   const catA = (a.catalog || '').toLowerCase()
   const catB = (b.catalog || '').toLowerCase()
 
-  const baseA = catA.replace(/\d+/g, '').trim()
-  const baseB = catB.replace(/\d+/g, '').trim()
-
-  if (baseA !== baseB) {
-    return baseA.localeCompare(baseB)
-  }
-
+  // число
   const numA = extractNumber(catA)
   const numB = extractNumber(catB)
 
-  return numA - numB
+  if (numA !== numB) {
+    return numA - numB
+  }
+
+  // если числа равны → сравниваем остаток (cd, lp и т.д.)
+  const suffixA = catA.replace(/\d+/g, '').trim()
+  const suffixB = catB.replace(/\d+/g, '').trim()
+
+  return suffixA.localeCompare(suffixB)
 })
 
         setReleases(all)
