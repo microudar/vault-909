@@ -16,6 +16,16 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
+function getReleaseKey(r) {
+  return [
+    r.artists.join(','),
+    r.title,
+    r.year,
+    r.label,
+    r.catalog
+  ].join('|').toLowerCase()
+}
+
 // 🔥 привязка листов к лейблам
 const SHEET_LABELS = {
   '1': 'M_nus',
@@ -110,6 +120,7 @@ export default function LabelPage() {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
         let all = []
+const seen = new Set()
 
         workbook.SheetNames.forEach(sheetName => {
           const sheet = workbook.Sheets[sheetName]
@@ -126,7 +137,12 @@ export default function LabelPage() {
 
             // 🔥 фильтр по лейблу
             if (normalizeSlug(parsed.label) === slug) {
-              all.push(parsed)
+              const key = getReleaseKey(parsed)
+
+if (!seen.has(key)) {
+  seen.add(key)
+  all.push(parsed)
+}
               if (!labelName) setLabelName(parsed.label)
             }
           })
