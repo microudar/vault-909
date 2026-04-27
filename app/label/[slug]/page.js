@@ -18,6 +18,11 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
+// 🔥 ключ
+function getKey(r) {
+  return `${r.artists.join('-')}-${r.title}`
+}
+
 function extractNumber(str) {
   const match = str?.match(/\d+/)
   return match ? Number(match[0]) : 0
@@ -66,7 +71,6 @@ function parseRelease(text) {
   if (!text) return {}
 
   text = text.replace(/\[\[/g, '[')
-
   const match = text.match(/\[(.*?)\]/)
 
   let label = ''
@@ -74,7 +78,6 @@ function parseRelease(text) {
 
   if (match) {
     const inside = match[1].replace(/\/+/g, '/').trim()
-
     if (inside.includes('/')) {
       const parts = inside.split('/')
       label = parts[0]?.trim() || ''
@@ -91,12 +94,9 @@ function parseRelease(text) {
 
   const artists = artistPart
     ? artistPart
-        .replace(/\b[Vv]s\.?\b/g, ',')
-        .replace(/\b[Ff]eat\.?\b/g, ',')
-        .replace(/\b[Ff]t\.?\b/g, ',')
-        .replace(/,\s*\./g, ',')
+        .replace(/\b(feat|ft|vs)\.?/gi, ',')
         .split(/[\/,&,]/)
-        .map(a => a.trim().replace(/^\.+/, ''))
+        .map(a => a.trim())
         .filter(Boolean)
     : []
 
@@ -117,6 +117,7 @@ export default function LabelPage() {
 
   const [releases, setReleases] = useState([])
   const [labelName, setLabelName] = useState('')
+  const [covers, setCovers] = useState({})
 
   useEffect(() => {
     fetch('/music.xlsx')
@@ -132,8 +133,7 @@ export default function LabelPage() {
           const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
 
           data.forEach(row => {
-            const text = Array.isArray(row) ? row.join(' ') : ''
-            const parsed = parseRelease(text)
+            const parsed = parseRelease(Array.isArray(row) ? row.join(' ') : '')
 
             if (SHEET_LABELS[sheetName]) {
               parsed.label = parsed.label || SHEET_LABELS[sheetName]
@@ -152,25 +152,42 @@ export default function LabelPage() {
           })
         })
 
-        // сортировка по каталогу
+        // 🔥 сортировка по каталогу
         all.sort((a, b) => {
-          const catA = (a.catalog || '').toLowerCase()
-          const catB = (b.catalog || '').toLowerCase()
-
-          const numA = extractNumber(catA)
-          const numB = extractNumber(catB)
+          const numA = extractNumber(a.catalog)
+          const numB = extractNumber(b.catalog)
 
           if (numA !== numB) return numA - numB
-
-          const suffixA = catA.replace(/\d+/g, '').trim()
-          const suffixB = catB.replace(/\d+/g, '').trim()
-
-          return suffixA.localeCompare(suffixB)
+          return (a.catalog || '').localeCompare(b.catalog || '')
         })
 
         setReleases(all)
       })
   }, [slug])
+
+  // 🔥 загрузка обложек
+  async function fetchCover(r) {
+    const key = getKey(r)
+    if (covers[key]) return
+
+    try {
+      const query = encodeURIComponent(`${r.artists[0]} ${r.title}`)
+      const res = await fetch(
+        `https://api.discogs.com/database/search?q=${query}&type=release`
+      )
+      const data = await res.json()
+      const cover = data.results?.[0]?.cover_image
+
+      if (cover) {
+        setCovers(prev => ({ ...prev, [key]: cover }))
+      }
+    } catch {}
+  }
+
+  useEffect(() => {
+    if (!releases.length) return
+    releases.slice(0, 15).forEach(fetchCover)
+  }, [releases])
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
@@ -196,51 +213,70 @@ export default function LabelPage() {
       </h1>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {releases.map((r, i) => (
-          <div
-            key={i}
-            style={{
-              padding: '14px 16px',
-              border: '1px solid #27272a',
-              background: '#18181b',
-              borderRadius: '10px'
-            }}
-          >
-            {/* артисты */}
-            <div>
-              {r.artists.map((artist, i) => (
-                <span key={i}>
-                  <a
-                    href={`/artist/${normalizeSlug(artist)}`}
-                    style={{ color: '#60a5fa', textDecoration: 'none' }}
-                  >
-                    {artist}
-                  </a>
-                  {i < r.artists.length - 1 && ', '}
-                </span>
-              ))}{' '}
-              — {r.title} ({r.year})
+        {releases.map((r, i) => {
+          const key = getKey(r)
+
+          return (
+            <div
+              key={i}
+              style={{
+                display: 'flex',
+                gap: '12px',
+                padding: '14px 16px',
+                border: '1px solid #27272a',
+                background: '#18181b',
+                borderRadius: '10px'
+              }}
+            >
+              {/* COVER */}
+              <img
+                src={covers[key] || ''}
+                alt=""
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  objectFit: 'cover',
+                  borderRadius: '6px',
+                  background: '#111',
+                  flexShrink: 0
+                }}
+              />
+
+              {/* CONTENT */}
+              <div style={{ flex: 1 }}>
+                <div>
+                  {r.artists.map((artist, i) => (
+                    <span key={i}>
+                      <a
+                        href={`/artist/${normalizeSlug(artist)}`}
+                        style={{ color: '#60a5fa', textDecoration: 'none' }}
+                      >
+                        {artist}
+                      </a>
+                      {i < r.artists.length - 1 && ', '}
+                    </span>
+                  ))}{' '}
+                  — {r.title} ({r.year})
+                </div>
+
+                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+                  {r.label && (
+                    <a
+                      href={`/label/${normalizeSlug(r.label)}`}
+                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
+                    >
+                      {r.label}
+                    </a>
+                  )}
+                  {r.label && r.catalog && ' / '}
+                  {r.catalog}
+                </div>
+
+                <ReleaseLinks r={r} />
+              </div>
             </div>
-
-            {/* лейбл */}
-            <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-              {r.label && (
-                <a
-                  href={`/label/${normalizeSlug(r.label)}`}
-                  style={{ color: '#a1a1aa', textDecoration: 'none' }}
-                >
-                  {r.label}
-                </a>
-              )}
-              {r.label && r.catalog && ' / '}
-              {r.catalog}
-            </div>
-
-            {/* 🔥 кнопки */}
-            <ReleaseLinks r={r} />
-
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
