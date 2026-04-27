@@ -194,15 +194,31 @@ export default function SearchPage() {
               — {r.title} ({r.year})
             </div>
 
-            {/* лейбл */}
-            <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-<div style={{ marginTop: '6px', display: 'flex', gap: '10px' }}>
-  
+           {/* лейбл */}
+<div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+  {r.label && (
+    <a
+      href={`/label/${normalizeSlug(r.label)}`}
+      style={{ color: '#a1a1aa', textDecoration: 'none' }}
+    >
+      {r.label}
+    </a>
+  )}
+  {r.label && r.catalog && ' / '}
+  {r.catalog}
+</div>
+
+{/* кнопки */}
+<div style={{ marginTop: '6px', display: 'flex', gap: '8px' }}>
   <a
     href={`https://bandcamp.com/search?q=${buildSearchQuery(r)}`}
     target="_blank"
+    rel="noopener noreferrer"
     style={{
-      fontSize: '12px',
+      fontSize: '11px',
+      padding: '3px 6px',
+      border: '1px solid #27272a',
+      borderRadius: '6px',
       color: '#60a5fa',
       textDecoration: 'none'
     }}
@@ -213,15 +229,18 @@ export default function SearchPage() {
   <a
     href={`https://www.discogs.com/search/?q=${buildSearchQuery(r)}&type=release`}
     target="_blank"
+    rel="noopener noreferrer"
     style={{
-      fontSize: '12px',
+      fontSize: '11px',
+      padding: '3px 6px',
+      border: '1px solid #27272a',
+      borderRadius: '6px',
       color: '#60a5fa',
       textDecoration: 'none'
     }}
   >
     Discogs
   </a>
-
 </div>
               {r.label && (
                 <a
