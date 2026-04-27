@@ -194,7 +194,7 @@ export default function SearchPage() {
               — {r.title} ({r.year})
             </div>
 
-           {/* лейбл */}
+         {/* лейбл */}
 <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
   {r.label && (
     <a
