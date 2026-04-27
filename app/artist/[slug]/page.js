@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 slug
 function normalizeSlug(text) {
   return text
     .toLowerCase()
@@ -18,20 +17,14 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
-// 🔥 уникальный ключ
 function getKey(r) {
   return `${r.artists.join('-')}-${r.title}`
 }
 
 function getReleaseKey(r) {
-  return [
-    r.artists.join(','),
-    r.title,
-    r.year
-  ].join('|').toLowerCase()
+  return [r.artists.join(','), r.title, r.year].join('|').toLowerCase()
 }
 
-// 🔥 парсер
 function parseRelease(text) {
   if (!text) return {}
 
@@ -58,8 +51,7 @@ function parseRelease(text) {
   const rest = parts.join(' - ')
 
   const artists = artistPart
-    ? artistPart
-        .replace(/\b(feat|ft|vs)\.?/gi, ',')
+    ? artistPart.replace(/\b(feat|ft|vs)\.?/gi, ',')
         .split(/[\/,&,]/)
         .map(a => a.trim())
         .filter(Boolean)
@@ -94,8 +86,7 @@ export default function ArtistPage() {
         const seen = new Set()
 
         workbook.SheetNames.forEach(sheetName => {
-          const sheet = workbook.Sheets[sheetName]
-          const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+          const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 })
 
           data.forEach(row => {
             const parsed = parseRelease(Array.isArray(row) ? row.join(' ') : '')
@@ -114,126 +105,73 @@ export default function ArtistPage() {
           })
         })
 
-        // 🔥 сортировка по году
         all.sort((a, b) => Number(b.year) - Number(a.year))
-
         setReleases(all)
       })
   }, [slug])
 
-  // 🔥 загрузка обложек
   async function fetchCover(r) {
     const key = getKey(r)
     if (covers[key]) return
 
+    const query = encodeURIComponent(`${r.artists.join(' ')} ${r.title} ${r.year}`)
+
     try {
-      const query = encodeURIComponent(`${r.artists[0]} ${r.title}`)
-      const res = await fetch(
-        `https://api.discogs.com/database/search?q=${query}&type=release`
-      )
+      const res = await fetch(`https://api.discogs.com/database/search?q=${query}&type=release`)
       const data = await res.json()
-      const cover = data.results?.[0]?.cover_image
+
+      const cover =
+        data.results?.[0]?.cover_image ||
+        data.results?.[0]?.thumb
 
       if (cover) {
         setCovers(prev => ({ ...prev, [key]: cover }))
+        return
+      }
+    } catch {}
+
+    try {
+      const itunes = await fetch(
+        `https://itunes.apple.com/search?term=${query}&entity=album`
+      ).then(r => r.json())
+
+      const img = itunes.results?.[0]?.artworkUrl100
+      if (img) {
+        setCovers(prev => ({ ...prev, [key]: img }))
       }
     } catch {}
   }
 
   useEffect(() => {
-    if (!releases.length) return
     releases.slice(0, 15).forEach(fetchCover)
   }, [releases])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
+    <div style={{ padding: '40px', background: '#09090b', minHeight: '100vh', color: '#fff' }}>
       <Header />
 
-      <button
-        onClick={() => window.history.back()}
-        style={{
-          marginBottom: '20px',
-          padding: '8px 14px',
-          background: '#18181b',
-          border: '1px solid #27272a',
-          color: '#fff',
-          cursor: 'pointer'
-        }}
-      >
-        ← Назад
-      </button>
+      <h1>{name || slug}</h1>
 
-      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
-        {name || slug}
-      </h1>
+      {releases.map((r, i) => {
+        const key = getKey(r)
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {releases.map((r, i) => {
-          const key = getKey(r)
+        return (
+          <div key={i} style={{ display: 'flex', gap: 12, padding: 12, background: '#18181b' }}>
 
-          return (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                gap: '12px',
-                padding: '14px 16px',
-                border: '1px solid #27272a',
-                background: '#18181b',
-                borderRadius: '10px'
-              }}
-            >
-              {/* COVER */}
-              <img
-                src={covers[key] || ''}
-                alt=""
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  objectFit: 'cover',
-                  borderRadius: '6px',
-                  background: '#111',
-                  flexShrink: 0
-                }}
-              />
+            {covers[key] ? (
+              <img src={covers[key]} style={{ width: 60, height: 60 }} />
+            ) : (
+              <div style={{ width: 60, height: 60, background: '#111' }} />
+            )}
 
-              {/* CONTENT */}
-              <div style={{ flex: 1 }}>
-                <div>
-                  {r.artists.map((artist, i) => (
-                    <span key={i}>
-                      <a
-                        href={`/artist/${normalizeSlug(artist)}`}
-                        style={{ color: '#60a5fa', textDecoration: 'none' }}
-                      >
-                        {artist}
-                      </a>
-                      {i < r.artists.length - 1 && ', '}
-                    </span>
-                  ))}{' '}
-                  — {r.title} ({r.year})
-                </div>
-
-                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-                  {r.label && (
-                    <a
-                      href={`/label/${normalizeSlug(r.label)}`}
-                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
-                    >
-                      {r.label}
-                    </a>
-                  )}
-                  {r.label && r.catalog && ' / '}
-                  {r.catalog}
-                </div>
-
-                <ReleaseLinks r={r} />
-              </div>
+            <div>
+              {r.artists.join(', ')} — {r.title} ({r.year})
+              <div>{r.label} / {r.catalog}</div>
+              <ReleaseLinks r={r} />
             </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
