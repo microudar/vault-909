@@ -16,6 +16,7 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
+// 🔥 парсер
 function parseRelease(text) {
   if (!text) return {}
 
@@ -67,67 +68,77 @@ function parseRelease(text) {
 
 export default function SearchPage() {
   const [query, setQuery] = useState('')
-  const [all, setAll] = useState([])
   const [debouncedQuery, setDebouncedQuery] = useState('')
-const [loaded, setLoaded] = useState(false)
+  const [all, setAll] = useState([])
+  const [loaded, setLoaded] = useState(false)
 
-useEffect(() => {
-  const t = setTimeout(() => {
-    setDebouncedQuery(query)
-  }, 300)
+  // 🔥 debounce
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedQuery(query)
+    }, 300)
 
-  return () => clearTimeout(t)
-}, [query])
-  
-useEffect(() => {
-  if (!debouncedQuery || loaded) return
+    return () => clearTimeout(t)
+  }, [query])
 
-  fetch('/music.xlsx')
-    .then(res => res.arrayBuffer())
-    .then(buffer => {
-      const workbook = XLSX.read(buffer, { type: 'array' })
+  // 🔥 загрузка Excel (один раз при первом поиске)
+  useEffect(() => {
+    if (!debouncedQuery || loaded) return
 
-      let list = []
+    fetch('/music.xlsx')
+      .then(res => res.arrayBuffer())
+      .then(buffer => {
+        const workbook = XLSX.read(buffer, { type: 'array' })
 
-      workbook.SheetNames.forEach(sheetName => {
-        const sheet = workbook.Sheets[sheetName]
-        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+        let list = []
 
-        data.forEach(row => {
-          const text = Array.isArray(row) ? row.join(' ') : ''
-          const parsed = parseRelease(text)
+        workbook.SheetNames.forEach(sheetName => {
+          const sheet = workbook.Sheets[sheetName]
+          const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
 
-          if (parsed.title) {
-            list.push(parsed)
-          }
+          data.forEach(row => {
+            const text = Array.isArray(row) ? row.join(' ') : ''
+            const parsed = parseRelease(text)
+
+            if (parsed.title) {
+              list.push(parsed)
+            }
+          })
         })
+
+        setAll(list)
+        setLoaded(true)
       })
+  }, [debouncedQuery, loaded])
 
-      setAll(list)
-      setLoaded(true)
+  // 🔥 фильтрация
+  const results = all
+    .filter(r => {
+      if (!debouncedQuery) return false
+
+      const text = [
+        r.artists.join(' '),
+        r.title,
+        r.label,
+        r.catalog
+      ]
+        .join(' ')
+        .toLowerCase()
+
+      return text.includes(debouncedQuery.toLowerCase())
     })
-}, [debouncedQuery, loaded])
-
-  const results = all.filter(r => {
-    const text = [
-      r.artists.join(' '),
-      r.title,
-      r.label,
-      r.catalog
-    ]
-      .join(' ')
-      .toLowerCase()
-
-    return text.includes(query.toLowerCase())
-  })
+    .slice(0, 50) // 🔥 лимит
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
+      
       <Header />
+
       <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
         Search
       </h1>
 
+      {/* поиск */}
       <input
         value={query}
         onChange={e => setQuery(e.target.value)}
@@ -142,6 +153,14 @@ useEffect(() => {
         }}
       />
 
+      {/* загрузка */}
+      {!loaded && debouncedQuery && (
+        <div style={{ marginBottom: '10px', color: '#71717a' }}>
+          Загрузка...
+        </div>
+      )}
+
+      {/* список */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {results.map((r, i) => (
           <div
@@ -153,6 +172,7 @@ useEffect(() => {
               borderRadius: '10px'
             }}
           >
+            {/* артисты */}
             <div>
               {r.artists.map((artist, i) => (
                 <span key={i}>
@@ -168,6 +188,7 @@ useEffect(() => {
               — {r.title} ({r.year})
             </div>
 
+            {/* лейбл */}
             <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
               {r.label && (
                 <a
