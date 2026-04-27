@@ -16,6 +16,12 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
+function buildSearchQuery(r) {
+  return encodeURIComponent(
+    `${r.artists.join(' ')} ${r.title}`
+  )
+}
+
 // 🔥 парсер
 function parseRelease(text) {
   if (!text) return {}
@@ -190,6 +196,33 @@ export default function SearchPage() {
 
             {/* лейбл */}
             <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+<div style={{ marginTop: '6px', display: 'flex', gap: '10px' }}>
+  
+  <a
+    href={`https://bandcamp.com/search?q=${buildSearchQuery(r)}`}
+    target="_blank"
+    style={{
+      fontSize: '12px',
+      color: '#60a5fa',
+      textDecoration: 'none'
+    }}
+  >
+    Bandcamp
+  </a>
+
+  <a
+    href={`https://www.discogs.com/search/?q=${buildSearchQuery(r)}&type=release`}
+    target="_blank"
+    style={{
+      fontSize: '12px',
+      color: '#60a5fa',
+      textDecoration: 'none'
+    }}
+  >
+    Discogs
+  </a>
+
+</div>
               {r.label && (
                 <a
                   href={`/label/${normalizeSlug(r.label)}`}
