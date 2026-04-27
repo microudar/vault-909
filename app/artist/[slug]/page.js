@@ -1,12 +1,12 @@
 'use client'
 
-import ReleaseLinks from '../../components/ReleaseLinks'
+import ReleaseLinks from '../../../components/ReleaseLinks'
 import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 тот же slug
+// 🔥 slug
 function normalizeSlug(text) {
   return text
     .toLowerCase()
@@ -89,7 +89,7 @@ export default function ArtistPage() {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
         let all = []
-const seen = new Set()
+        const seen = new Set()
 
         workbook.SheetNames.forEach(sheetName => {
           const sheet = workbook.Sheets[sheetName]
@@ -102,12 +102,10 @@ const seen = new Set()
             if (parsed.artists.some(a => normalizeSlug(a) === slug)) {
               const key = getReleaseKey(parsed)
 
-if (!seen.has(key)) {
-  seen.add(key)
-  all.push(parsed)
-}
-
-              all.sort((a, b) => Number(b.year) - Number(a.year))
+              if (!seen.has(key)) {
+                seen.add(key)
+                all.push(parsed)
+              }
 
               const found = parsed.artists.find(a => normalizeSlug(a) === slug)
               if (found && !name) setName(found)
@@ -115,13 +113,18 @@ if (!seen.has(key)) {
           })
         })
 
+        // 🔥 сортировка по году (новые сверху)
+        all.sort((a, b) => Number(b.year) - Number(a.year))
+
         setReleases(all)
       })
   }, [slug])
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
+      
       <Header />
+
       <button
         onClick={() => window.history.back()}
         style={{
@@ -151,6 +154,7 @@ if (!seen.has(key)) {
               borderRadius: '10px'
             }}
           >
+            {/* артисты */}
             <div>
               {r.artists.map((artist, i) => (
                 <span key={i}>
@@ -166,6 +170,7 @@ if (!seen.has(key)) {
               — {r.title} ({r.year})
             </div>
 
+            {/* лейбл */}
             <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
               {r.label && (
                 <a
@@ -178,9 +183,12 @@ if (!seen.has(key)) {
               {r.label && r.catalog && ' / '}
               {r.catalog}
             </div>
+
+            {/* 🔥 КНОПКИ */}
+            <ReleaseLinks r={r} />
+
           </div>
         ))}
-          <ReleaseLinks r={r} />
       </div>
     </div>
   )
