@@ -1,11 +1,12 @@
 'use client'
 
+import ReleaseLinks from '../../../components/ReleaseLinks'
 import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 ЕДИНЫЙ SLUG
+// 🔥 SLUG
 function normalizeSlug(text) {
   return text
     .toLowerCase()
@@ -136,8 +137,9 @@ export default function SheetPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
+      
       <Header />
-      {/* 🔙 кнопка */}
+
       <button
         onClick={() => window.location.href = '/'}
         style={{
@@ -152,12 +154,10 @@ export default function SheetPage() {
         ← Назад
       </button>
 
-      {/* заголовок */}
       <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
         {title || name}
       </h1>
 
-      {/* поиск */}
       <input
         value={query}
         onChange={e => setQuery(e.target.value)}
@@ -171,7 +171,6 @@ export default function SheetPage() {
         }}
       />
 
-      {/* список */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {filtered.map((row, i) => {
           const text = Array.isArray(row)
@@ -202,10 +201,7 @@ export default function SheetPage() {
                   <span key={i}>
                     <a
                       href={`/artist/${normalizeSlug(artist)}`}
-                      style={{
-                        color: '#60a5fa',
-                        textDecoration: 'none'
-                      }}
+                      style={{ color: '#60a5fa', textDecoration: 'none' }}
                     >
                       {artist}
                     </a>
@@ -221,10 +217,7 @@ export default function SheetPage() {
                   {parsed.label && (
                     <a
                       href={`/label/${normalizeSlug(parsed.label)}`}
-                      style={{
-                        color: '#a1a1aa',
-                        textDecoration: 'none'
-                      }}
+                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
                     >
                       {parsed.label}
                     </a>
@@ -233,6 +226,10 @@ export default function SheetPage() {
                   {parsed.catalog}
                 </div>
               )}
+
+              {/* 🔥 КНОПКИ */}
+              <ReleaseLinks r={parsed} />
+
             </div>
           )
         })}
