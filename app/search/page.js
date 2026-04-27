@@ -1,5 +1,6 @@
 'use client'
 
+import ReleaseLinks from '../../components/ReleaseLinks'
 import Header from '../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
@@ -203,6 +204,8 @@ export default function SearchPage() {
               {r.label && r.catalog && ' / '}
               {r.catalog}
             </div>
+
+<ReleaseLinks r={r} />
 
             {/* кнопки */}
             <div style={{ marginTop: '6px', display: 'flex', gap: '8px' }}>
