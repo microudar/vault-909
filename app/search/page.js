@@ -16,10 +16,9 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
+// 🔥 поиск ссылки
 function buildSearchQuery(r) {
-  return encodeURIComponent(
-    `${r.artists.join(' ')} ${r.title}`
-  )
+  return encodeURIComponent(`${r.artists.join(' ')} ${r.title}`)
 }
 
 // 🔥 парсер
@@ -78,7 +77,7 @@ export default function SearchPage() {
   const [all, setAll] = useState([])
   const [loaded, setLoaded] = useState(false)
 
-  // 🔥 debounce
+  // debounce
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedQuery(query)
@@ -87,7 +86,7 @@ export default function SearchPage() {
     return () => clearTimeout(t)
   }, [query])
 
-  // 🔥 загрузка Excel (один раз при первом поиске)
+  // загрузка Excel
   useEffect(() => {
     if (!debouncedQuery || loaded) return
 
@@ -117,7 +116,7 @@ export default function SearchPage() {
       })
   }, [debouncedQuery, loaded])
 
-  // 🔥 фильтрация
+  // фильтр
   const results = all
     .filter(r => {
       if (!debouncedQuery) return false
@@ -133,7 +132,7 @@ export default function SearchPage() {
 
       return text.includes(debouncedQuery.toLowerCase())
     })
-    .slice(0, 50) // 🔥 лимит
+    .slice(0, 50)
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
@@ -144,7 +143,6 @@ export default function SearchPage() {
         Search
       </h1>
 
-      {/* поиск */}
       <input
         value={query}
         onChange={e => setQuery(e.target.value)}
@@ -159,14 +157,12 @@ export default function SearchPage() {
         }}
       />
 
-      {/* загрузка */}
       {!loaded && debouncedQuery && (
         <div style={{ marginBottom: '10px', color: '#71717a' }}>
           Загрузка...
         </div>
       )}
 
-      {/* список */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {results.map((r, i) => (
           <div
@@ -194,54 +190,8 @@ export default function SearchPage() {
               — {r.title} ({r.year})
             </div>
 
-         {/* лейбл */}
-<div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-  {r.label && (
-    <a
-      href={`/label/${normalizeSlug(r.label)}`}
-      style={{ color: '#a1a1aa', textDecoration: 'none' }}
-    >
-      {r.label}
-    </a>
-  )}
-  {r.label && r.catalog && ' / '}
-  {r.catalog}
-</div>
-
-{/* кнопки */}
-<div style={{ marginTop: '6px', display: 'flex', gap: '8px' }}>
-  <a
-    href={`https://bandcamp.com/search?q=${buildSearchQuery(r)}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{
-      fontSize: '11px',
-      padding: '3px 6px',
-      border: '1px solid #27272a',
-      borderRadius: '6px',
-      color: '#60a5fa',
-      textDecoration: 'none'
-    }}
-  >
-    Bandcamp
-  </a>
-
-  <a
-    href={`https://www.discogs.com/search/?q=${buildSearchQuery(r)}&type=release`}
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{
-      fontSize: '11px',
-      padding: '3px 6px',
-      border: '1px solid #27272a',
-      borderRadius: '6px',
-      color: '#60a5fa',
-      textDecoration: 'none'
-    }}
-  >
-    Discogs
-  </a>
-</div>
+            {/* лейбл */}
+            <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
               {r.label && (
                 <a
                   href={`/label/${normalizeSlug(r.label)}`}
@@ -252,6 +202,45 @@ export default function SearchPage() {
               )}
               {r.label && r.catalog && ' / '}
               {r.catalog}
+            </div>
+
+            {/* кнопки */}
+            <div style={{ marginTop: '6px', display: 'flex', gap: '8px' }}>
+              
+              {/* Bandcamp */}
+              <a
+                href={`https://bandcamp.com/search?q=${buildSearchQuery(r)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: '12px',
+                  padding: '4px 6px',
+                  border: '1px solid #27272a',
+                  borderRadius: '6px',
+                  color: '#60a5fa',
+                  textDecoration: 'none'
+                }}
+              >
+                🟦 BC
+              </a>
+
+              {/* Discogs */}
+              <a
+                href={`https://www.discogs.com/search/?q=${buildSearchQuery(r)}&type=release`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: '12px',
+                  padding: '4px 6px',
+                  border: '1px solid #27272a',
+                  borderRadius: '6px',
+                  color: '#60a5fa',
+                  textDecoration: 'none'
+                }}
+              >
+                🟡 DG
+              </a>
+
             </div>
           </div>
         ))}
