@@ -74,7 +74,20 @@ export default function ArtistPage() {
 
   const [releases, setReleases] = useState([])
   const [name, setName] = useState('')
-  const [covers, setCovers] = useState({})
+
+  // 🔥 КЭШ ОБЛОЖЕК
+  const [covers, setCovers] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('covers')
+      return cached ? JSON.parse(cached) : {}
+    }
+    return {}
+  })
+
+  // сохраняем кэш
+  useEffect(() => {
+    localStorage.setItem('covers', JSON.stringify(covers))
+  }, [covers])
 
   useEffect(() => {
     fetch('/music.xlsx')
@@ -112,12 +125,16 @@ export default function ArtistPage() {
 
   async function fetchCover(r) {
     const key = getKey(r)
+
+    // уже есть — не грузим
     if (covers[key]) return
 
     const query = encodeURIComponent(`${r.artists.join(' ')} ${r.title} ${r.year}`)
 
     try {
-      const res = await fetch(`https://api.discogs.com/database/search?q=${query}&type=release`)
+      const res = await fetch(
+        `https://api.discogs.com/database/search?q=${query}&type=release`
+      )
       const data = await res.json()
 
       const cover =
@@ -136,14 +153,16 @@ export default function ArtistPage() {
       ).then(r => r.json())
 
       const img = itunes.results?.[0]?.artworkUrl100
+
       if (img) {
         setCovers(prev => ({ ...prev, [key]: img }))
       }
     } catch {}
   }
 
+  // 🔥 грузим только часть (ускорение)
   useEffect(() => {
-    releases.slice(0, 15).forEach(fetchCover)
+    releases.slice(0, 10).forEach(fetchCover)
   }, [releases])
 
   return (
@@ -190,7 +209,6 @@ export default function ArtistPage() {
 
                 <div style={{ display: 'flex', gap: '12px' }}>
 
-                  {/* ОБЛОЖКА */}
                   <img
                     src={cover || '/no-cover.png'}
                     alt=""
@@ -203,7 +221,6 @@ export default function ArtistPage() {
                     }}
                   />
 
-                  {/* ТЕКСТ */}
                   <div style={{ flex: 1 }}>
 
                     <div>
