@@ -147,31 +147,81 @@ export default function ArtistPage() {
   }, [releases])
 
   return (
-    <div style={{ padding: '40px', background: '#09090b', minHeight: '100vh', color: '#fff' }}>
-      <Header />
+  <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff' }}>
+    
+    <Header />
 
-      <h1>{name || slug}</h1>
+    {/* верх */}
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+      
+      <button
+        onClick={() => window.history.back()}
+        style={{
+          marginBottom: '20px',
+          padding: '8px 14px',
+          background: '#18181b',
+          border: '1px solid #27272a',
+          color: '#fff',
+          cursor: 'pointer'
+        }}
+      >
+        ← Назад
+      </button>
 
-      {releases.map((r, i) => {
-        const key = getKey(r)
+      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
+        {name || slug}
+      </h1>
 
-        return (
-          <div key={i} style={{ display: 'flex', gap: 12, padding: 12, background: '#18181b' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        
+        {releases.map((r, i) => (
+          <div
+            key={i}
+            style={{
+              padding: '14px 16px',
+              border: '1px solid #27272a',
+              background: '#18181b',
+              borderRadius: '10px'
+            }}
+          >
 
-            {covers[key] ? (
-              <img src={covers[key]} style={{ width: 60, height: 60 }} />
-            ) : (
-              <div style={{ width: 60, height: 60, background: '#111' }} />
-            )}
-
+            {/* строка 1 */}
             <div>
-              {r.artists.join(', ')} — {r.title} ({r.year})
-              <div>{r.label} / {r.catalog}</div>
-              <ReleaseLinks r={r} />
+              {r.artists.map((artist, i) => (
+                <span key={i}>
+                  <a
+                    href={`/artist/${normalizeSlug(artist)}`}
+                    style={{ color: '#60a5fa', textDecoration: 'none' }}
+                  >
+                    {artist}
+                  </a>
+                  {i < r.artists.length - 1 && ', '}
+                </span>
+              ))}{' '}
+              — {r.title} ({r.year})
             </div>
+
+            {/* строка 2 */}
+            <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+              {r.label && (
+                <a
+                  href={`/label/${normalizeSlug(r.label)}`}
+                  style={{ color: '#a1a1aa', textDecoration: 'none' }}
+                >
+                  {r.label}
+                </a>
+              )}
+              {r.label && r.catalog && ' / '}
+              {r.catalog}
+            </div>
+
+            <ReleaseLinks r={r} />
+
           </div>
-        )
-      })}
+        ))}
+
+      </div>
     </div>
-  )
+  </div>
+)
 }
