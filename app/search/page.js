@@ -17,11 +17,6 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
-// 🔥 поиск ссылки
-function buildSearchQuery(r) {
-  return encodeURIComponent(`${r.artists.join(' ')} ${r.title}`)
-}
-
 // 🔥 парсер
 function parseRelease(text) {
   if (!text) return {}
@@ -78,7 +73,7 @@ export default function SearchPage() {
   const [all, setAll] = useState([])
   const [loaded, setLoaded] = useState(false)
 
-  // debounce
+  // 🔥 debounce
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedQuery(query)
@@ -87,7 +82,7 @@ export default function SearchPage() {
     return () => clearTimeout(t)
   }, [query])
 
-  // загрузка Excel
+  // 🔥 загрузка Excel (один раз)
   useEffect(() => {
     if (!debouncedQuery || loaded) return
 
@@ -117,7 +112,7 @@ export default function SearchPage() {
       })
   }, [debouncedQuery, loaded])
 
-  // фильтр
+  // 🔥 фильтр
   const results = all
     .filter(r => {
       if (!debouncedQuery) return false
@@ -205,46 +200,9 @@ export default function SearchPage() {
               {r.catalog}
             </div>
 
-<ReleaseLinks r={r} />
+            {/* 🔥 единый компонент кнопок */}
+            <ReleaseLinks r={r} />
 
-            {/* кнопки */}
-            <div style={{ marginTop: '6px', display: 'flex', gap: '8px' }}>
-              
-              {/* Bandcamp */}
-              <a
-                href={`https://bandcamp.com/search?q=${buildSearchQuery(r)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontSize: '12px',
-                  padding: '4px 6px',
-                  border: '1px solid #27272a',
-                  borderRadius: '6px',
-                  color: '#60a5fa',
-                  textDecoration: 'none'
-                }}
-              >
-                🟦 BC
-              </a>
-
-              {/* Discogs */}
-              <a
-                href={`https://www.discogs.com/search/?q=${buildSearchQuery(r)}&type=release`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontSize: '12px',
-                  padding: '4px 6px',
-                  border: '1px solid #27272a',
-                  borderRadius: '6px',
-                  color: '#60a5fa',
-                  textDecoration: 'none'
-                }}
-              >
-                🟡 DG
-              </a>
-
-            </div>
           </div>
         ))}
       </div>
