@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 slug
+// slug
 function normalizeSlug(text) {
   return text
     .toLowerCase()
@@ -18,16 +18,18 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
-// 🔥 ключ
+// ключ
 function getKey(r) {
   return `${r.artists.join('-')}-${r.title}`
 }
 
+// номер из каталога
 function extractNumber(str) {
   const match = str?.match(/\d+/)
   return match ? Number(match[0]) : 0
 }
 
+// уникальность
 function getReleaseKey(r) {
   return [
     r.artists.join(','),
@@ -36,7 +38,7 @@ function getReleaseKey(r) {
   ].join('|').toLowerCase()
 }
 
-// 🔥 лейблы по листам
+// sheet → label
 const SHEET_LABELS = {
   '1': 'M_nus',
   '2': 'Plus 8 Records Ltd.',
@@ -66,7 +68,7 @@ const SHEET_LABELS = {
   '26': 'Border Community',
 }
 
-// 🔥 парсер
+// парсер
 function parseRelease(text) {
   if (!text) return {}
 
@@ -78,6 +80,7 @@ function parseRelease(text) {
 
   if (match) {
     const inside = match[1].replace(/\/+/g, '/').trim()
+
     if (inside.includes('/')) {
       const parts = inside.split('/')
       label = parts[0]?.trim() || ''
@@ -129,8 +132,7 @@ export default function LabelPage() {
         const seen = new Set()
 
         workbook.SheetNames.forEach(sheetName => {
-          const sheet = workbook.Sheets[sheetName]
-          const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+          const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 })
 
           data.forEach(row => {
             const parsed = parseRelease(Array.isArray(row) ? row.join(' ') : '')
@@ -152,7 +154,7 @@ export default function LabelPage() {
           })
         })
 
-        // 🔥 сортировка по каталогу
+        // сортировка по каталогу
         all.sort((a, b) => {
           const numA = extractNumber(a.catalog)
           const numB = extractNumber(b.catalog)
@@ -165,27 +167,47 @@ export default function LabelPage() {
       })
   }, [slug])
 
-  // 🔥 загрузка обложек
+  // 🔥 ОБЛОЖКИ
   async function fetchCover(r) {
     const key = getKey(r)
     if (covers[key]) return
 
+    const query = encodeURIComponent(
+      `${r.artists.join(' ')} ${r.title} ${r.year}`
+    )
+
+    // 1. Discogs
     try {
-      const query = encodeURIComponent(`${r.artists[0]} ${r.title}`)
       const res = await fetch(
         `https://api.discogs.com/database/search?q=${query}&type=release`
       )
       const data = await res.json()
-      const cover = data.results?.[0]?.cover_image
+
+      const cover =
+        data.results?.[0]?.cover_image ||
+        data.results?.[0]?.thumb
 
       if (cover) {
         setCovers(prev => ({ ...prev, [key]: cover }))
+        return
+      }
+    } catch {}
+
+    // 2. iTunes fallback
+    try {
+      const itunes = await fetch(
+        `https://itunes.apple.com/search?term=${query}&entity=album`
+      ).then(r => r.json())
+
+      const img = itunes.results?.[0]?.artworkUrl100
+
+      if (img) {
+        setCovers(prev => ({ ...prev, [key]: img }))
       }
     } catch {}
   }
 
   useEffect(() => {
-    if (!releases.length) return
     releases.slice(0, 15).forEach(fetchCover)
   }, [releases])
 
@@ -229,18 +251,29 @@ export default function LabelPage() {
               }}
             >
               {/* COVER */}
-              <img
-                src={covers[key] || ''}
-                alt=""
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  objectFit: 'cover',
-                  borderRadius: '6px',
-                  background: '#111',
-                  flexShrink: 0
-                }}
-              />
+              {covers[key] ? (
+                <img
+                  src={covers[key]}
+                  alt=""
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    objectFit: 'cover',
+                    borderRadius: '6px',
+                    flexShrink: 0
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    background: '#111',
+                    borderRadius: '6px',
+                    flexShrink: 0
+                  }}
+                />
+              )}
 
               {/* CONTENT */}
               <div style={{ flex: 1 }}>
