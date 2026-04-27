@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 SLUG
+// slug
 function normalizeSlug(text) {
   return text
     .toLowerCase()
@@ -20,6 +20,11 @@ function normalizeSlug(text) {
 
 function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-')
+}
+
+// ключ
+function getKey(r) {
+  return `${r.artists.join('-')}-${r.title}`
 }
 
 const SHEET_LABELS = {
@@ -51,11 +56,11 @@ const SHEET_LABELS = {
   '26': 'Border Community',
 }
 
+// парсер
 function parseRelease(text) {
   if (!text) return {}
 
   text = text.replace(/\[\[/g, '[')
-
   const match = text.match(/\[(.*?)\]/)
 
   let label = ''
@@ -80,12 +85,9 @@ function parseRelease(text) {
 
   const artists = artistPart
     ? artistPart
-        .replace(/\b[Vv]s\.?\b/g, ',')
-        .replace(/\b[Ff]eat\.?\b/g, ',')
-        .replace(/\b[Ff]t\.?\b/g, ',')
-        .replace(/,\s*\./g, ',')
+        .replace(/\b(feat|ft|vs)\.?/gi, ',')
         .split(/[\/,&,]/)
-        .map(a => a.trim().replace(/^\.+/, ''))
+        .map(a => a.trim())
         .filter(Boolean)
     : []
 
@@ -107,7 +109,9 @@ export default function SheetPage() {
   const [rows, setRows] = useState([])
   const [query, setQuery] = useState('')
   const [title, setTitle] = useState('')
+  const [covers, setCovers] = useState({})
 
+  // загрузка excel
   useEffect(() => {
     fetch('/music.xlsx')
       .then(res => res.arrayBuffer())
@@ -128,12 +132,67 @@ export default function SheetPage() {
       })
   }, [name])
 
-  const filtered = rows.filter(row =>
-    Object.values(row)
-      .join(' ')
-      .toLowerCase()
-      .includes(query.toLowerCase())
-  )
+  // fetch cover
+  async function fetchCover(r) {
+    const key = getKey(r)
+    if (covers[key]) return
+
+    const q = encodeURIComponent(`${r.artists.join(' ')} ${r.title} ${r.year}`)
+
+    // Discogs
+    try {
+      const res = await fetch(`https://api.discogs.com/database/search?q=${q}&type=release`)
+      const data = await res.json()
+
+      const cover =
+        data.results?.[0]?.cover_image ||
+        data.results?.[0]?.thumb
+
+      if (cover) {
+        setCovers(prev => ({ ...prev, [key]: cover }))
+        return
+      }
+    } catch {}
+
+    // iTunes fallback
+    try {
+      const itunes = await fetch(
+        `https://itunes.apple.com/search?term=${q}&entity=album`
+      ).then(r => r.json())
+
+      const img = itunes.results?.[0]?.artworkUrl100
+
+      if (img) {
+        setCovers(prev => ({ ...prev, [key]: img }))
+      }
+    } catch {}
+  }
+
+  const filtered = rows
+    .map(row => {
+      const text = Array.isArray(row)
+        ? row.join(' ')
+        : Object.values(row).join(' ')
+
+      const parsed = parseRelease(text)
+
+      if (SHEET_LABELS[name]) {
+        parsed.label = parsed.label || SHEET_LABELS[name]
+      }
+
+      return parsed
+    })
+    .filter(r =>
+      `${r.artists} ${r.title} ${r.label}`
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    )
+    .filter(r => r.title)
+
+  // загрузка обложек
+  useEffect(() => {
+    filtered.slice(0, 15).forEach(fetchCover)
+  }, [filtered])
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
@@ -172,64 +231,78 @@ export default function SheetPage() {
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {filtered.map((row, i) => {
-          const text = Array.isArray(row)
-            ? row.join(' ')
-            : Object.values(row).join(' ')
-
-          const parsed = parseRelease(text)
-
-          if (SHEET_LABELS[name]) {
-            parsed.label = parsed.label || SHEET_LABELS[name]
-          }
-
-          if (!parsed.title) return null
+        {filtered.map((r, i) => {
+          const key = getKey(r)
 
           return (
             <div
               key={i}
               style={{
+                display: 'flex',
+                gap: '12px',
                 padding: '14px 16px',
                 border: '1px solid #27272a',
                 background: '#18181b',
                 borderRadius: '10px'
               }}
             >
-              {/* артисты */}
-              <div style={{ fontSize: '15px' }}>
-                {parsed.artists.map((artist, i) => (
-                  <span key={i}>
-                    <a
-                      href={`/artist/${normalizeSlug(artist)}`}
-                      style={{ color: '#60a5fa', textDecoration: 'none' }}
-                    >
-                      {artist}
-                    </a>
-                    {i < parsed.artists.length - 1 && ', '}
-                  </span>
-                ))}{' '}
-                — {parsed.title} ({parsed.year})
-              </div>
-
-              {/* лейбл */}
-              {(parsed.label || parsed.catalog) && (
-                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-                  {parsed.label && (
-                    <a
-                      href={`/label/${normalizeSlug(parsed.label)}`}
-                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
-                    >
-                      {parsed.label}
-                    </a>
-                  )}
-                  {parsed.label && parsed.catalog && ' / '}
-                  {parsed.catalog}
-                </div>
+              {/* COVER */}
+              {covers[key] ? (
+                <img
+                  src={covers[key]}
+                  alt=""
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    objectFit: 'cover',
+                    borderRadius: '6px',
+                    flexShrink: 0
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    background: '#111',
+                    borderRadius: '6px',
+                    flexShrink: 0
+                  }}
+                />
               )}
 
-              {/* 🔥 КНОПКИ */}
-              <ReleaseLinks r={parsed} />
+              {/* CONTENT */}
+              <div style={{ flex: 1 }}>
+                <div>
+                  {r.artists.map((artist, i) => (
+                    <span key={i}>
+                      <a
+                        href={`/artist/${normalizeSlug(artist)}`}
+                        style={{ color: '#60a5fa', textDecoration: 'none' }}
+                      >
+                        {artist}
+                      </a>
+                      {i < r.artists.length - 1 && ', '}
+                    </span>
+                  ))}{' '}
+                  — {r.title} ({r.year})
+                </div>
 
+                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+                  {r.label && (
+                    <a
+                      href={`/label/${normalizeSlug(r.label)}`}
+                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
+                    >
+                      {r.label}
+                    </a>
+                  )}
+                  {r.label && r.catalog && ' / '}
+                  {r.catalog}
+                </div>
+
+                <ReleaseLinks r={r} />
+              </div>
             </div>
           )
         })}
