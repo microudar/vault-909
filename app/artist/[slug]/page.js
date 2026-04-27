@@ -1,5 +1,6 @@
 'use client'
 
+import ReleaseLinks from '../../components/ReleaseLinks'
 import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
@@ -179,6 +180,7 @@ if (!seen.has(key)) {
             </div>
           </div>
         ))}
+          <ReleaseLinks r={r} />
       </div>
     </div>
   )
