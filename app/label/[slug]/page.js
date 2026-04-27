@@ -1,7 +1,7 @@
 'use client'
 
-import ReleaseLinks from '../components/ReleaseLinks'
-import Header from '../components/Header'
+import ReleaseLinks from '../../../components/ReleaseLinks'
+import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
