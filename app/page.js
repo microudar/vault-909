@@ -1,27 +1,93 @@
 'use client'
 
 import Header from '../components/Header'
+import ReleaseLinks from '../components/ReleaseLinks'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
+
+function normalizeSlug(text) {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\+/g, 'plus')
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+}
+
+function parseRelease(text) {
+  if (!text) return {}
+
+  text = text.replace(/\[\[/g, '[')
+  const match = text.match(/\[(.*?)\]/)
+
+  let label = ''
+  let catalog = ''
+
+  if (match) {
+    const inside = match[1].replace(/\/+/g, '/').trim()
+    if (inside.includes('/')) {
+      const parts = inside.split('/')
+      label = parts[0]?.trim() || ''
+      catalog = parts[1]?.trim() || ''
+    } else {
+      catalog = inside
+    }
+  }
+
+  const cleaned = text.replace(/\[.*?\]/, '').trim()
+  const parts = cleaned.split(' - ')
+  const artistPart = parts.shift()
+  const rest = parts.join(' - ')
+
+  const artists = artistPart
+    ? artistPart.replace(/\b(feat|ft|vs)\.?/gi, ',')
+        .split(/[\/,&,]/)
+        .map(a => a.trim())
+        .filter(Boolean)
+    : []
+
+  let title = ''
+  let year = ''
+
+  if (rest) {
+    const words = rest.trim().split(' ')
+    year = words.pop()
+    title = words.join(' ')
+  }
+
+  return { artists, title, year, label, catalog }
+}
 
 export default function Home() {
   const [sheets, setSheets] = useState([])
   const [query, setQuery] = useState('')
+  const [latest, setLatest] = useState([])
 
   useEffect(() => {
     fetch('/music.xlsx')
-      .then((res) => res.arrayBuffer())
-      .then((buffer) => {
+      .then(res => res.arrayBuffer())
+      .then(buffer => {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
-        const loadedSheets = workbook.SheetNames.map((name) => ({
-          name,
-        }))
+        // категории
+        setSheets(workbook.SheetNames.map(name => ({ name })))
 
-        setSheets(loadedSheets)
-      })
-      .catch((error) => {
-        console.error('Ошибка загрузки Excel:', error)
+        // 🔥 собираем последние релизы
+        let all = []
+
+        workbook.SheetNames.forEach(sheetName => {
+          const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 })
+
+          data.forEach(row => {
+            const parsed = parseRelease(Array.isArray(row) ? row.join(' ') : '')
+            if (parsed.title) all.push(parsed)
+          })
+        })
+
+        all.sort((a, b) => Number(b.year) - Number(a.year))
+        setLatest(all.slice(0, 12))
       })
   }, [])
 
@@ -39,17 +105,11 @@ export default function Home() {
       {/* HERO */}
       <div style={{ borderBottom: '1px solid #27272a' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
-          <h1 style={{ fontSize: '48px', fontWeight: '900', marginBottom: '10px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: '900' }}>
             Архив 909
           </h1>
-
-          <p style={{ color: '#a1a1aa', marginBottom: '10px' }}>
+          <p style={{ color: '#a1a1aa' }}>
             Архив электронной музыки
-          </p>
-
-          <p style={{ color: '#a1a1aa', maxWidth: '700px' }}>
-            Коллекция редкой электронной музыки: техно, минимал,
-            эмбиент, андеграундные лейблы и полные дискографии.
           </p>
         </div>
       </div>
@@ -60,7 +120,7 @@ export default function Home() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleSearch}
-          placeholder="Поиск (нажми Enter)..."
+          placeholder="Поиск..."
           style={{
             width: '100%',
             maxWidth: '400px',
@@ -72,42 +132,62 @@ export default function Home() {
         />
       </div>
 
+      {/* 🔥 ПОСЛЕДНИЕ РЕЛИЗЫ */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+        <h2 style={{ marginBottom: '10px' }}>Последние релизы</h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {latest.map((r, i) => (
+            <div
+              key={i}
+              style={{
+                padding: '12px',
+                border: '1px solid #27272a',
+                background: '#18181b',
+                borderRadius: '10px'
+              }}
+            >
+              <div>
+                {r.artists.map((a, i) => (
+                  <span key={i}>
+                    <a href={`/artist/${normalizeSlug(a)}`} style={{ color: '#60a5fa' }}>
+                      {a}
+                    </a>
+                    {i < r.artists.length - 1 && ', '}
+                  </span>
+                ))}{' '}
+                — {r.title} ({r.year})
+              </div>
+
+              <div style={{ fontSize: '13px', color: '#71717a' }}>
+                {r.label} {r.catalog && ` / ${r.catalog}`}
+              </div>
+
+              <ReleaseLinks r={r} />
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* КАТЕГОРИИ */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '10px' }}>
-          Категории
-        </h2>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+        <h2 style={{ marginBottom: '10px' }}>Категории</h2>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-          {sheets.map((sheet) => {
-            const slug = sheet.name.toLowerCase().replace(/\s+/g, '-')
-
-            return (
-              <a
-                key={sheet.name}
-                href={`/sheet/${slug}`}
-                style={{
-                  padding: '10px 14px',
-                  background: '#18181b',
-                  border: '1px solid #27272a',
-                  borderRadius: '8px',
-                  color: '#fff',
-                  textDecoration: 'none',
-                  transition: '0.15s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#3f3f46'
-                  e.currentTarget.style.background = '#1f1f23'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#27272a'
-                  e.currentTarget.style.background = '#18181b'
-                }}
-              >
-                {sheet.name}
-              </a>
-            )
-          })}
+          {sheets.map((sheet) => (
+            <a
+              key={sheet.name}
+              href={`/sheet/${sheet.name.toLowerCase().replace(/\s+/g, '-')}`}
+              style={{
+                padding: '10px',
+                background: '#18181b',
+                border: '1px solid #27272a',
+                borderRadius: '8px'
+              }}
+            >
+              {sheet.name}
+            </a>
+          ))}
         </div>
       </div>
 
