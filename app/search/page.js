@@ -68,32 +68,45 @@ function parseRelease(text) {
 export default function SearchPage() {
   const [query, setQuery] = useState('')
   const [all, setAll] = useState([])
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+const [loaded, setLoaded] = useState(false)
 
-  useEffect(() => {
-    fetch('/music.xlsx')
-      .then(res => res.arrayBuffer())
-      .then(buffer => {
-        const workbook = XLSX.read(buffer, { type: 'array' })
+useEffect(() => {
+  const t = setTimeout(() => {
+    setDebouncedQuery(query)
+  }, 300)
 
-        let list = []
+  return () => clearTimeout(t)
+}, [query])
+  
+useEffect(() => {
+  if (!debouncedQuery || loaded) return
 
-        workbook.SheetNames.forEach(sheetName => {
-          const sheet = workbook.Sheets[sheetName]
-          const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+  fetch('/music.xlsx')
+    .then(res => res.arrayBuffer())
+    .then(buffer => {
+      const workbook = XLSX.read(buffer, { type: 'array' })
 
-          data.forEach(row => {
-            const text = Array.isArray(row) ? row.join(' ') : ''
-            const parsed = parseRelease(text)
+      let list = []
 
-            if (parsed.title) {
-              list.push(parsed)
-            }
-          })
+      workbook.SheetNames.forEach(sheetName => {
+        const sheet = workbook.Sheets[sheetName]
+        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+        data.forEach(row => {
+          const text = Array.isArray(row) ? row.join(' ') : ''
+          const parsed = parseRelease(text)
+
+          if (parsed.title) {
+            list.push(parsed)
+          }
         })
-
-        setAll(list)
       })
-  }, [])
+
+      setAll(list)
+      setLoaded(true)
+    })
+}, [debouncedQuery, loaded])
 
   const results = all.filter(r => {
     const text = [
