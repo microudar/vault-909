@@ -1,12 +1,12 @@
 'use client'
 
-import ReleaseLinks from '../../components/ReleaseLinks'
+import ReleaseLinks from '../../../components/ReleaseLinks'
 import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useParams } from 'next/navigation'
 
-// 🔥 единый slug (как везде)
+// 🔥 slug
 function normalizeSlug(text) {
   return text
     .toLowerCase()
@@ -31,7 +31,7 @@ function getReleaseKey(r) {
   ].join('|').toLowerCase()
 }
 
-// 🔥 привязка листов к лейблам
+// 🔥 лейблы по листам
 const SHEET_LABELS = {
   '1': 'M_nus',
   '2': 'Plus 8 Records Ltd.',
@@ -125,7 +125,7 @@ export default function LabelPage() {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
         let all = []
-const seen = new Set()
+        const seen = new Set()
 
         workbook.SheetNames.forEach(sheetName => {
           const sheet = workbook.Sheets[sheetName]
@@ -135,42 +135,38 @@ const seen = new Set()
             const text = Array.isArray(row) ? row.join(' ') : ''
             const parsed = parseRelease(text)
 
-            // 🔥 добавляем лейбл из листа
             if (SHEET_LABELS[sheetName]) {
               parsed.label = parsed.label || SHEET_LABELS[sheetName]
             }
 
-            // 🔥 фильтр по лейблу
             if (normalizeSlug(parsed.label) === slug) {
               const key = getReleaseKey(parsed)
 
-if (!seen.has(key)) {
-  seen.add(key)
-  all.push(parsed)
-}
+              if (!seen.has(key)) {
+                seen.add(key)
+                all.push(parsed)
+              }
+
               if (!labelName) setLabelName(parsed.label)
             }
           })
         })
 
-    all.sort((a, b) => {
-  const catA = (a.catalog || '').toLowerCase()
-  const catB = (b.catalog || '').toLowerCase()
+        // сортировка по каталогу
+        all.sort((a, b) => {
+          const catA = (a.catalog || '').toLowerCase()
+          const catB = (b.catalog || '').toLowerCase()
 
-  // число
-  const numA = extractNumber(catA)
-  const numB = extractNumber(catB)
+          const numA = extractNumber(catA)
+          const numB = extractNumber(catB)
 
-  if (numA !== numB) {
-    return numA - numB
-  }
+          if (numA !== numB) return numA - numB
 
-  // если числа равны → сравниваем остаток (cd, lp и т.д.)
-  const suffixA = catA.replace(/\d+/g, '').trim()
-  const suffixB = catB.replace(/\d+/g, '').trim()
+          const suffixA = catA.replace(/\d+/g, '').trim()
+          const suffixB = catB.replace(/\d+/g, '').trim()
 
-  return suffixA.localeCompare(suffixB)
-})
+          return suffixA.localeCompare(suffixB)
+        })
 
         setReleases(all)
       })
@@ -178,8 +174,9 @@ if (!seen.has(key)) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
+      
       <Header />
-      {/* кнопка */}
+
       <button
         onClick={() => window.history.back()}
         style={{
@@ -194,12 +191,10 @@ if (!seen.has(key)) {
         ← Назад
       </button>
 
-      {/* заголовок */}
       <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
         {labelName || slug}
       </h1>
 
-      {/* список */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {releases.map((r, i) => (
           <div
@@ -217,10 +212,7 @@ if (!seen.has(key)) {
                 <span key={i}>
                   <a
                     href={`/artist/${normalizeSlug(artist)}`}
-                    style={{
-                      color: '#60a5fa',
-                      textDecoration: 'none'
-                    }}
+                    style={{ color: '#60a5fa', textDecoration: 'none' }}
                   >
                     {artist}
                   </a>
@@ -235,18 +227,18 @@ if (!seen.has(key)) {
               {r.label && (
                 <a
                   href={`/label/${normalizeSlug(r.label)}`}
-                  style={{
-                    color: '#a1a1aa',
-                    textDecoration: 'none'
-                  }}
+                  style={{ color: '#a1a1aa', textDecoration: 'none' }}
                 >
                   {r.label}
                 </a>
               )}
               {r.label && r.catalog && ' / '}
               {r.catalog}
-<ReleaseLinks r={r} />
             </div>
+
+            {/* 🔥 кнопки */}
+            <ReleaseLinks r={r} />
+
           </div>
         ))}
       </div>
