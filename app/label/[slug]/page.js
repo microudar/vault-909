@@ -245,10 +245,10 @@ if (!seen.has(key)) {
               )}
               {r.label && r.catalog && ' / '}
               {r.catalog}
+<ReleaseLinks r={r} />
             </div>
           </div>
         ))}
-          <ReleaseLinks r={r} />
       </div>
     </div>
   )
