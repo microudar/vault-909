@@ -5,7 +5,6 @@ import Header from '../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 
-// 🔥 slug
 function normalizeSlug(text) {
   return text
     .toLowerCase()
@@ -17,12 +16,10 @@ function normalizeSlug(text) {
     .replace(/\s+/g, '-')
 }
 
-// 🔥 парсер
 function parseRelease(text) {
   if (!text) return {}
 
   text = text.replace(/\[\[/g, '[')
-
   const match = text.match(/\[(.*?)\]/)
 
   let label = ''
@@ -30,7 +27,6 @@ function parseRelease(text) {
 
   if (match) {
     const inside = match[1].replace(/\/+/g, '/').trim()
-
     if (inside.includes('/')) {
       const parts = inside.split('/')
       label = parts[0]?.trim() || ''
@@ -46,10 +42,7 @@ function parseRelease(text) {
   const rest = parts.join(' - ')
 
   const artists = artistPart
-    ? artistPart
-        .replace(/\b[Vv]s\.?\b/g, ',')
-        .replace(/\b[Ff]eat\.?\b/g, ',')
-        .replace(/\b[Ff]t\.?\b/g, ',')
+    ? artistPart.replace(/\b(feat|ft|vs)\.?/gi, ',')
         .split(/[\/,&,]/)
         .map(a => a.trim())
         .filter(Boolean)
@@ -71,141 +64,80 @@ export default function SearchPage() {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [all, setAll] = useState([])
-  const [loaded, setLoaded] = useState(false)
+  const [covers, setCovers] = useState({})
 
-  // 🔥 debounce
   useEffect(() => {
-    const t = setTimeout(() => {
-      setDebouncedQuery(query)
-    }, 300)
-
+    const t = setTimeout(() => setDebouncedQuery(query), 300)
     return () => clearTimeout(t)
   }, [query])
 
-  // 🔥 загрузка Excel (один раз)
   useEffect(() => {
-    if (!debouncedQuery || loaded) return
+    if (!debouncedQuery || all.length) return
 
     fetch('/music.xlsx')
       .then(res => res.arrayBuffer())
       .then(buffer => {
         const workbook = XLSX.read(buffer, { type: 'array' })
-
         let list = []
 
-        workbook.SheetNames.forEach(sheetName => {
-          const sheet = workbook.Sheets[sheetName]
-          const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
-
+        workbook.SheetNames.forEach(sheet => {
+          const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet], { header: 1 })
           data.forEach(row => {
-            const text = Array.isArray(row) ? row.join(' ') : ''
-            const parsed = parseRelease(text)
-
-            if (parsed.title) {
-              list.push(parsed)
-            }
+            const parsed = parseRelease(Array.isArray(row) ? row.join(' ') : '')
+            if (parsed.title) list.push(parsed)
           })
         })
 
         setAll(list)
-        setLoaded(true)
       })
-  }, [debouncedQuery, loaded])
+  }, [debouncedQuery])
 
-  // 🔥 фильтр
+  async function fetchCover(r) {
+    const key = `${r.artists.join('-')}-${r.title}`
+    if (covers[key]) return
+
+    try {
+      const q = encodeURIComponent(`${r.artists[0]} ${r.title}`)
+      const res = await fetch(`https://api.discogs.com/database/search?q=${q}&type=release`)
+      const data = await res.json()
+      const img = data.results?.[0]?.cover_image
+      if (img) setCovers(prev => ({ ...prev, [key]: img }))
+    } catch {}
+  }
+
   const results = all
     .filter(r => {
       if (!debouncedQuery) return false
-
-      const text = [
-        r.artists.join(' '),
-        r.title,
-        r.label,
-        r.catalog
-      ]
-        .join(' ')
-        .toLowerCase()
-
-      return text.includes(debouncedQuery.toLowerCase())
+      return `${r.artists} ${r.title} ${r.label}`.toLowerCase().includes(debouncedQuery.toLowerCase())
     })
-    .slice(0, 50)
+    .slice(0, 30)
+
+  useEffect(() => {
+    results.slice(0, 15).forEach(fetchCover)
+  }, [results])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
+    <div style={{ padding: '40px', background: '#09090b', minHeight: '100vh', color: '#fff' }}>
       <Header />
+      <h1>Search</h1>
 
-      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
-        Search
-      </h1>
+      <input value={query} onChange={e => setQuery(e.target.value)} />
 
-      <input
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        placeholder="Search artist, label, release..."
-        style={{
-          width: '100%',
-          padding: '10px',
-          marginBottom: '20px',
-          background: '#18181b',
-          border: '1px solid #27272a',
-          color: '#fff'
-        }}
-      />
+      {results.map((r, i) => {
+        const key = `${r.artists.join('-')}-${r.title}`
 
-      {!loaded && debouncedQuery && (
-        <div style={{ marginBottom: '10px', color: '#71717a' }}>
-          Загрузка...
-        </div>
-      )}
+        return (
+          <div key={i} style={{ display: 'flex', gap: 12, padding: 12, background: '#18181b' }}>
+            <img src={covers[key] || ''} style={{ width: 60, height: 60 }} />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {results.map((r, i) => (
-          <div
-            key={i}
-            style={{
-              padding: '14px 16px',
-              border: '1px solid #27272a',
-              background: '#18181b',
-              borderRadius: '10px'
-            }}
-          >
-            {/* артисты */}
             <div>
-              {r.artists.map((artist, i) => (
-                <span key={i}>
-                  <a
-                    href={`/artist/${normalizeSlug(artist)}`}
-                    style={{ color: '#60a5fa', textDecoration: 'none' }}
-                  >
-                    {artist}
-                  </a>
-                  {i < r.artists.length - 1 && ', '}
-                </span>
-              ))}{' '}
-              — {r.title} ({r.year})
+              {r.artists.join(', ')} — {r.title} ({r.year})
+              <div>{r.label} / {r.catalog}</div>
+              <ReleaseLinks r={r} />
             </div>
-
-            {/* лейбл */}
-            <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-              {r.label && (
-                <a
-                  href={`/label/${normalizeSlug(r.label)}`}
-                  style={{ color: '#a1a1aa', textDecoration: 'none' }}
-                >
-                  {r.label}
-                </a>
-              )}
-              {r.label && r.catalog && ' / '}
-              {r.catalog}
-            </div>
-
-            {/* 🔥 единый компонент кнопок */}
-            <ReleaseLinks r={r} />
-
           </div>
-        ))}
-      </div>
+        )
+      })}
     </div>
   )
 }
