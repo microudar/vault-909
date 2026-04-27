@@ -1,93 +1,283 @@
 'use client'
 
+import ReleaseLinks from '../../../components/ReleaseLinks'
+import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
+import { useParams } from 'next/navigation'
 
-export default function Home() {
-  const [sheets, setSheets] = useState([])
+// 🔥 slug
+function normalizeSlug(text) {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\+/g, 'plus')
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+}
+
+function slugify(text) {
+  return text.toLowerCase().replace(/\s+/g, '-')
+}
+
+// 🔥 ключ
+function getKey(r) {
+  return `${r.artists.join('-')}-${r.title}`
+}
+
+const SHEET_LABELS = {
+  '1': 'M_nus',
+  '2': 'Plus 8 Records Ltd.',
+  '3': 'Mobilee',
+  '4': 'Delsin',
+  '5': 'Ostgut Ton',
+  '6': 'Blueprint',
+  '7': 'Echocord',
+  '8': 'Semantica',
+  '9': 'Prologue',
+  '10': 'Sandwell District',
+  '11': 'Stroboscopic Artefacts',
+  '12': 'Tresor',
+  '13': 'Music Man Records',
+  '14': 'Synewave',
+  '15': 'Modern Love',
+  '16': '50Weapons',
+  '17': 'Downwards',
+  '18': 'L.I.E.S. (Long Island Electrical Systems)',
+  '19': 'Stil Vor Talent',
+  '20': 'Ovum Recordings',
+  '21': 'Wolf + Lamb Music',
+  '22': 'Liebe*Detail Digital',
+  '23': 'Systematic',
+  '24': 'Dirtybird',
+  '25': 'Traum Schallplatten',
+  '26': 'Border Community',
+}
+
+// 🔥 парсер
+function parseRelease(text) {
+  if (!text) return {}
+
+  text = text.replace(/\[\[/g, '[')
+  const match = text.match(/\[(.*?)\]/)
+
+  let label = ''
+  let catalog = ''
+
+  if (match) {
+    const inside = match[1].replace(/\/+/g, '/').trim()
+
+    if (inside.includes('/')) {
+      const parts = inside.split('/')
+      label = parts[0]?.trim() || ''
+      catalog = parts[1]?.trim() || ''
+    } else {
+      catalog = inside
+    }
+  }
+
+  const cleaned = text.replace(/\[.*?\]/, '').trim()
+  const parts = cleaned.split(' - ')
+  const artistPart = parts.shift()
+  const rest = parts.join(' - ')
+
+  const artists = artistPart
+    ? artistPart
+        .replace(/\b(feat|ft|vs)\.?/gi, ',')
+        .split(/[\/,&,]/)
+        .map(a => a.trim())
+        .filter(Boolean)
+    : []
+
+  let title = ''
+  let year = ''
+
+  if (rest) {
+    const words = rest.trim().split(' ')
+    year = words.pop()
+    title = words.join(' ')
+  }
+
+  return { artists, title, year, label, catalog }
+}
+
+export default function SheetPage() {
+  const { name } = useParams()
+
+  const [rows, setRows] = useState([])
   const [query, setQuery] = useState('')
+  const [title, setTitle] = useState('')
+  const [covers, setCovers] = useState({})
 
   useEffect(() => {
     fetch('/music.xlsx')
-      .then((res) => res.arrayBuffer())
-      .then((buffer) => {
+      .then(res => res.arrayBuffer())
+      .then(buffer => {
         const workbook = XLSX.read(buffer, { type: 'array' })
 
-        const loadedSheets = workbook.SheetNames.map((name) => ({
-          name,
-        }))
+        const realName = workbook.SheetNames.find(
+          n => slugify(n) === name
+        )
 
-        setSheets(loadedSheets)
+        if (!realName) return
+
+        const sheet = workbook.Sheets[realName]
+        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+        setRows(data)
+        setTitle(realName)
       })
-      .catch((error) => {
-        console.error('Ошибка загрузки Excel:', error)
-      })
-  }, [])
+  }, [name])
+
+  // 🔥 загрузка обложки
+  async function fetchCover(r) {
+    const key = getKey(r)
+    if (covers[key]) return
+
+    try {
+      const query = encodeURIComponent(`${r.artists[0]} ${r.title}`)
+      const res = await fetch(
+        `https://api.discogs.com/database/search?q=${query}&type=release`
+      )
+      const data = await res.json()
+      const cover = data.results?.[0]?.cover_image
+
+      if (cover) {
+        setCovers(prev => ({ ...prev, [key]: cover }))
+      }
+    } catch {}
+  }
+
+  const filtered = rows
+    .map(row => {
+      const text = Array.isArray(row)
+        ? row.join(' ')
+        : Object.values(row).join(' ')
+
+      const parsed = parseRelease(text)
+
+      if (SHEET_LABELS[name]) {
+        parsed.label = parsed.label || SHEET_LABELS[name]
+      }
+
+      return parsed
+    })
+    .filter(r =>
+      `${r.artists} ${r.title} ${r.label}`
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    )
+    .filter(r => r.title)
+
+  // 🔥 грузим обложки
+  useEffect(() => {
+    filtered.slice(0, 15).forEach(fetchCover)
+  }, [filtered])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#09090b', color: '#e4e4e7' }}>
+    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
       
-      {/* HERO */}
-      <div style={{ borderBottom: '1px solid #27272a' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
-          <h1 style={{ fontSize: '48px', fontWeight: '900', marginBottom: '10px' }}>
-            Архив 909
-          </h1>
+      <Header />
 
-          <p style={{ color: '#a1a1aa', marginBottom: '10px' }}>
-            Архив электронной музыки
-          </p>
+      <button
+        onClick={() => window.location.href = '/'}
+        style={{
+          marginBottom: '20px',
+          padding: '8px 14px',
+          background: '#18181b',
+          border: '1px solid #27272a',
+          color: '#fff',
+          cursor: 'pointer'
+        }}
+      >
+        ← Назад
+      </button>
 
-          <p style={{ color: '#a1a1aa', maxWidth: '700px' }}>
-            Коллекция редкой электронной музыки: техно, минимал,
-            эмбиент, андеграундные лейблы и полные дискографии.
-          </p>
-        </div>
-      </div>
+      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
+        {title || name}
+      </h1>
 
-      {/* ПОИСК */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Поиск (пока не подключён)..."
-          style={{
-            width: '100%',
-            maxWidth: '400px',
-            padding: '10px',
-            background: '#18181b',
-            border: '1px solid #27272a',
-            color: '#fff'
-          }}
-        />
-      </div>
+      <input
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="Поиск..."
+        style={{
+          padding: '10px',
+          marginBottom: '20px',
+          background: '#18181b',
+          border: '1px solid #27272a',
+          color: '#fff'
+        }}
+      />
 
-      {/* КАТЕГОРИИ */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '10px' }}>
-          Категории
-        </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {filtered.map((r, i) => {
+          const key = getKey(r)
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-          {sheets.map((sheet) => (
-            <a
-              key={sheet.name}
-              href={`/sheet/${sheet.name.toLowerCase().replace(/\s+/g, '-')}`}
+          return (
+            <div
+              key={i}
               style={{
-                padding: '10px 14px',
-                background: '#18181b',
+                display: 'flex',
+                gap: '12px',
+                padding: '14px 16px',
                 border: '1px solid #27272a',
-                borderRadius: '8px',
-                color: '#fff',
-                textDecoration: 'none'
+                background: '#18181b',
+                borderRadius: '10px'
               }}
             >
-              {sheet.name}
-            </a>
-          ))}
-        </div>
-      </div>
+              {/* COVER */}
+              <img
+                src={covers[key] || ''}
+                alt=""
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  objectFit: 'cover',
+                  borderRadius: '6px',
+                  background: '#111',
+                  flexShrink: 0
+                }}
+              />
 
+              {/* CONTENT */}
+              <div style={{ flex: 1 }}>
+                <div>
+                  {r.artists.map((artist, i) => (
+                    <span key={i}>
+                      <a
+                        href={`/artist/${normalizeSlug(artist)}`}
+                        style={{ color: '#60a5fa', textDecoration: 'none' }}
+                      >
+                        {artist}
+                      </a>
+                      {i < r.artists.length - 1 && ', '}
+                    </span>
+                  ))}{' '}
+                  — {r.title} ({r.year})
+                </div>
+
+                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+                  {r.label && (
+                    <a
+                      href={`/label/${normalizeSlug(r.label)}`}
+                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
+                    >
+                      {r.label}
+                    </a>
+                  )}
+                  {r.label && r.catalog && ' / '}
+                  {r.catalog}
+                </div>
+
+                <ReleaseLinks r={r} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
