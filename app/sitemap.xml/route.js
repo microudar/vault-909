@@ -9,7 +9,7 @@ ${Array.from({ length: parts })
   .map(
     (_, i) => `
   <sitemap>
-    <loc>${base}/sitemap-${i + 1}.xml</loc>
+    <loc>${base}/sitemap/${i + 1}</loc>
   </sitemap>`
   )
   .join('')}
