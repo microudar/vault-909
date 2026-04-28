@@ -149,35 +149,54 @@ export default function Home() {
         </div>
       </div>
 
-      {/* FOOTER */}
-      <div
-        style={{
-          marginTop: '60px',
-          borderTop: '1px solid #27272a',
-          padding: '20px',
-          textAlign: 'center',
-          color: '#71717a',
-          fontSize: '13px'
-        }}
-      >
-        <div>
-          Contact:{' '}
-          <a
-            href="mailto:micro_udar12@mail.ru"
-            style={{
-              color: '#a1a1aa',
-              textDecoration: 'none'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#60a5fa'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#a1a1aa'
-            }}
-          >
-            micro_udar12@mail.ru
-          </a>
-        </div>
+     {/* FOOTER */}
+<div
+  style={{
+    marginTop: '60px',
+    borderTop: '1px solid #27272a',
+    padding: '20px',
+    display: 'flex',
+    justifyContent: 'center'
+  }}
+>
+  <a
+    href="mailto:micro_udar12@mail.ru"
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '36px',
+      height: '36px',
+      border: '1px solid #27272a',
+      borderRadius: '8px',
+      background: '#18181b',
+      transition: '0.2s'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.borderColor = '#60a5fa'
+      e.currentTarget.style.boxShadow = '0 0 10px rgba(96,165,250,0.5)'
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.borderColor = '#27272a'
+      e.currentTarget.style.boxShadow = 'none'
+    }}
+  >
+    {/* SVG иконка почты */}
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#a1a1aa"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 4h16v16H4z" stroke="none"/>
+      <path d="M4 4l8 8 8-8" />
+    </svg>
+  </a>
+</div>
       </div>
     </div>
   )
