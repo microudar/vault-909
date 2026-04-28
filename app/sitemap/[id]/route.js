@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx'
 
 function slugify(text) {
-  return String(text)
+  return text
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -11,70 +11,55 @@ function slugify(text) {
     .replace(/\s+/g, '-')
 }
 
-function parseRow(text) {
-  const result = { artists: [], label: null }
-
-  if (!text) return result
-
-  const artistPart = text.split(' - ')[0]
-  if (artistPart) {
-    result.artists = artistPart.split(',').map(a => a.trim())
-  }
-
-  const labelMatch = text.match(/\[(.*?)\]/)
-  if (labelMatch) {
-    result.label = labelMatch[1].split('/')[0].trim()
-  }
-
-  return result
-}
-
 export async function GET(req, { params }) {
-  const page = Number(params.id) || 1
-  const chunkSize = 10000
+  const id = parseInt(params.id)
 
-  const res = await fetch('https://vault909.ru/music.xlsx')
-  const buffer = await res.arrayBuffer()
-  const workbook = XLSX.read(buffer, { type: 'array' })
+  try {
+    const res = await fetch('https://vault909.ru/music.xlsx')
+    const buffer = await res.arrayBuffer()
 
-  const urls = new Set()
+    const workbook = XLSX.read(buffer, { type: 'array' })
 
-  urls.add('https://vault909.ru/')
+    const urls = []
 
-  workbook.SheetNames.forEach((sheetName) => {
-    urls.add(`https://vault909.ru/sheet/${slugify(sheetName)}`)
-  })
+    workbook.SheetNames.forEach((sheetName) => {
+      const sheetSlug = slugify(sheetName)
+      urls.push(`https://vault909.ru/sheet/${sheetSlug}`)
 
-  workbook.SheetNames.forEach((sheetName) => {
-    const sheet = workbook.Sheets[sheetName]
-    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+      const sheet = workbook.Sheets[sheetName]
+      const json = XLSX.utils.sheet_to_json(sheet)
 
-    rows.forEach((row) => {
-      const text = row[0]
-      if (!text) return
+      json.forEach((row) => {
+        if (row.artists) {
+          row.artists.split(',').forEach((artist) => {
+            const slug = slugify(artist.trim())
+            if (slug) {
+              urls.push(`https://vault909.ru/artist/${slug}`)
+            }
+          })
+        }
 
-      const parsed = parseRow(text)
-
-      parsed.artists.forEach((artist) => {
-        urls.add(`https://vault909.ru/artist/${slugify(artist)}`)
+        if (row.label) {
+          const slug = slugify(row.label)
+          urls.push(`https://vault909.ru/label/${slug}`)
+        }
       })
-
-      if (parsed.label) {
-        urls.add(`https://vault909.ru/label/${slugify(parsed.label)}`)
-      }
     })
-  })
 
-  const all = Array.from(urls)
+    const uniqueUrls = [...new Set(urls)]
 
-  const start = (page - 1) * chunkSize
-  const end = start + chunkSize
+    const chunkSize = 5000
+    const chunks = []
 
-  const chunk = all.slice(start, end)
+    for (let i = 0; i < uniqueUrls.length; i += chunkSize) {
+      chunks.push(uniqueUrls.slice(i, i + chunkSize))
+    }
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    const selected = chunks[id - 1] || []
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${chunk
+${selected
   .map(
     (url) => `
   <url>
@@ -84,7 +69,10 @@ ${chunk
   .join('')}
 </urlset>`
 
-  return new Response(xml, {
-    headers: { 'Content-Type': 'application/xml' }
-  })
+    return new Response(xml, {
+      headers: { 'Content-Type': 'application/xml' },
+    })
+  } catch (e) {
+    return new Response('Error', { status: 500 })
+  }
 }
