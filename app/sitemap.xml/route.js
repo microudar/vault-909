@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx'
 
 function slugify(text) {
-  return text
+  return String(text)
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -35,9 +35,20 @@ export async function GET() {
       const json = XLSX.utils.sheet_to_json(sheet)
 
       json.forEach((row) => {
+        const keys = Object.keys(row)
+
+        const artistKey = keys.find((k) =>
+          k.toLowerCase().includes('artist')
+        )
+
+        const labelKey = keys.find((k) =>
+          k.toLowerCase().includes('label')
+        )
+
         // Артисты
-        if (row.artists) {
-          const artists = row.artists.split(',')
+        if (artistKey && row[artistKey]) {
+          const artists = String(row[artistKey]).split(',')
+
           artists.forEach((artist) => {
             const slug = slugify(artist.trim())
             if (slug) {
@@ -47,9 +58,11 @@ export async function GET() {
         }
 
         // Лейблы
-        if (row.label) {
-          const slug = slugify(row.label)
-          urls.add(`https://vault909.ru/label/${slug}`)
+        if (labelKey && row[labelKey]) {
+          const slug = slugify(row[labelKey])
+          if (slug) {
+            urls.add(`https://vault909.ru/label/${slug}`)
+          }
         }
       })
     })
