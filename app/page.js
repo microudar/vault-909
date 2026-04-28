@@ -78,30 +78,7 @@ export default function Home() {
 
       <LabelMarquee />
 
-      {/* ПОИСК */}
-      <div
-        style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '20px'
-        }}
-      >
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleSearch}
-          placeholder="Поиск (нажми Enter)..."
-          style={{
-            width: '100%',
-            maxWidth: '400px',
-            padding: '10px',
-            background: '#18181b',
-            border: '1px solid #27272a',
-            color: '#fff'
-          }}
-        />
-      </div>
-
+     
       {/* КАТЕГОРИИ */}
       <div
         style={{
