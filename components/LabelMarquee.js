@@ -65,7 +65,7 @@ const labels = [
   'dionysian-mysteries'
 ]
 
-function Row({ reverse = false, speed = 10 }) {
+function Row({ reverse = false, speed = 30 }) {
   return (
     <div
       className="marquee"
@@ -130,7 +130,7 @@ export default function LabelMarquee() {
       <div style={fadeRight} />
 
       {/* строка 1 */}
-      <Row speed={10} />
+      <Row speed={30} />
 
       {/* строка 2 (обратная и быстрее) */}
       <Row reverse speed={20} />
