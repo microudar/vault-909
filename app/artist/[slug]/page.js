@@ -186,10 +186,6 @@ export default function ArtistPage() {
           ← Назад
         </button>
 
-        <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
-          {name || slug}
-        </h1>
-
           <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
   {name || slug}
 </h1>
@@ -199,7 +195,7 @@ export default function ArtistPage() {
   marginBottom: '20px',
   maxWidth: '600px'
 }}>
-  {name || slug} — электронный артист. Здесь собрана полная дискография,
+  {name || slug} — электронный артист. Здесь собрана дискография,
   включая EP, альбомы и редкие релизы.
 </p>
 
