@@ -1,7 +1,7 @@
 'use client'
 
 const labels = [
-  'echocord',
+  'analogical-force',
   'tresor',
   'planet-mu',
   'warp',
