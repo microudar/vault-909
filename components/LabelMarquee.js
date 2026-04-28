@@ -65,47 +65,75 @@ const labels = [
   'dionysian-mysteries'
 ]
 
+function Row({ reverse = false, speed = 30 }) {
+  return (
+    <div
+      className="marquee"
+      style={{
+        display: 'flex',
+        gap: '60px',
+        width: 'max-content',
+        animation: `${reverse ? 'scroll-reverse' : 'scroll'} ${speed}s linear infinite`
+      }}
+    >
+      {[...labels, ...labels].map((slug, i) => (
+        <a
+          key={i}
+          href={`/label/${slug}`}
+          style={{ display: 'flex', alignItems: 'center' }}
+        >
+          <img
+            src={`/logos/${slug}.png`}
+            alt={slug}
+            style={{
+              height: '80px',
+              width: 'auto',
+              objectFit: 'contain',
+              opacity: 0.8,
+              filter: 'grayscale(1)',
+              transition: '0.25s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1'
+              e.currentTarget.style.filter = 'none'
+              e.currentTarget.style.transform = 'scale(1.1)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8'
+              e.currentTarget.style.filter = 'grayscale(1)'
+              e.currentTarget.style.transform = 'scale(1)'
+            }}
+            onError={(e) => {
+              e.currentTarget.style.display = 'none'
+            }}
+          />
+        </a>
+      ))}
+    </div>
+  )
+}
+
 export default function LabelMarquee() {
   return (
-    <div style={{ overflow: 'hidden', borderTop: '1px solid #27272a', borderBottom: '1px solid #27272a' }}>
-      
-      <div style={{
-        display: 'flex',
-        gap: '40px',
-        width: 'max-content',
-        animation: 'scroll 30s linear infinite'
+    <div
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        padding: '20px 0',
+        borderTop: '1px solid #27272a',
+        borderBottom: '1px solid #27272a'
       }}
-      className="marquee"
-      >
+    >
+      {/* fade слева */}
+      <div style={fadeLeft} />
+      {/* fade справа */}
+      <div style={fadeRight} />
 
-        {[...labels, ...labels].map((slug, i) => (
-          <a
-            key={i}
-            href={`/label/${slug}`}
-            style={{ display: 'flex', alignItems: 'center' }}
-          >
-            <img
-              src={`/logos/${slug}.png`}
-              alt={slug}
-              style={{
-                height: '80px',
-                opacity: 0.8,
-                filter: 'grayscale(1)',
-                transition: '0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = '1'
-                e.currentTarget.style.filter = 'none'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '0.8'
-                e.currentTarget.style.filter = 'grayscale(1)'
-              }}
-            />
-          </a>
-        ))}
+      {/* строка 1 */}
+      <Row speed={30} />
 
-      </div>
+      {/* строка 2 (обратная и быстрее) */}
+      <Row reverse speed={20} />
 
       <style jsx>{`
         .marquee:hover {
@@ -120,8 +148,36 @@ export default function LabelMarquee() {
             transform: translateX(-50%);
           }
         }
-      `}</style>
 
+        @keyframes scroll-reverse {
+          from {
+            transform: translateX(-50%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </div>
   )
+}
+
+const fadeLeft = {
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  bottom: 0,
+  width: '100px',
+  background: 'linear-gradient(to right, #09090b, transparent)',
+  zIndex: 2
+}
+
+const fadeRight = {
+  position: 'absolute',
+  right: 0,
+  top: 0,
+  bottom: 0,
+  width: '100px',
+  background: 'linear-gradient(to left, #09090b, transparent)',
+  zIndex: 2
 }
