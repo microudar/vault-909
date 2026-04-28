@@ -234,6 +234,19 @@ export default function LabelPage() {
         {labelName || slug}
       </h1>
 
+        <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
+  {labelName || slug}
+</h1>
+
+<p style={{
+  color: '#a1a1aa',
+  marginBottom: '20px',
+  maxWidth: '600px'
+}}>
+  {labelName || slug} — лейбл электронной музыки. Здесь представлен полный каталог релизов,
+  включая EP, винил и альбомы.
+</p>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {releases.map((r, i) => {
           const key = getKey(r)
