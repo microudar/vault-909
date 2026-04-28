@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx'
+export const dynamic = 'force-dynamic'
 
 function slugify(text) {
   return text
