@@ -38,33 +38,27 @@ export async function GET() {
       const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
 
       data.forEach((row) => {
-        const text = Array.isArray(row) ? row.join(' ') : ''
-        if (!text) return
+  const text = Array.isArray(row) ? row.join(' ') : ''
+  if (!text) return
 
-        // артисты
-        const parts = text.split(' - ')
-        const artistPart = parts[0]
+  // === АРТИСТ ===
+  const artist = text.split(' - ')[0]?.trim()
 
-        if (artistPart) {
-          artistPart
-            .replace(/\b(feat|ft|vs)\.?/gi, ',')
-            .split(/[\/,&,]/)
-            .map(a => a.trim())
-            .filter(Boolean)
-            .forEach(a => {
-              urls.add(`${base}/artist/${slugify(a)}`)
-            })
-        }
+  if (artist) {
+    urls.add(`${base}/artist/${slugify(artist)}`)
+  }
 
-        // лейбл
-        const match = text.match(/\[(.*?)\]/)
-        if (match) {
-          const label = match[1].split('/')[0].trim()
-          if (label) {
-            urls.add(`${base}/label/${slugify(label)}`)
-          }
-        }
-      })
+  // === ЛЕЙБЛ ===
+  const match = text.match(/\[(.*?)\]/)
+
+  if (match) {
+    const label = match[1].split('/')[0].trim()
+
+    if (label) {
+      urls.add(`${base}/label/${slugify(label)}`)
+    }
+  }
+})
     })
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
