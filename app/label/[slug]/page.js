@@ -230,10 +230,6 @@ export default function LabelPage() {
         ← Назад
       </button>
 
-      <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
-        {labelName || slug}
-      </h1>
-
         <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
   {labelName || slug}
 </h1>
@@ -243,7 +239,7 @@ export default function LabelPage() {
   marginBottom: '20px',
   maxWidth: '600px'
 }}>
-  {labelName || slug} — лейбл электронной музыки. Здесь представлен полный каталог релизов,
+  {labelName || slug} — лейбл электронной музыки. Здесь представлен каталог релизов,
   включая EP, винил и альбомы.
 </p>
 
