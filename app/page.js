@@ -34,31 +34,34 @@ export default function Home() {
 
   return (
     <div
-  style={{
-    minHeight: '100vh',
-    color: '#e4e4e7',
-    backgroundImage: 'url(/bg.jpg)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundAttachment: 'fixed'
-  }}
->
-  <div
-  style={{
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0,0,0,0.75)',
-    zIndex: 0
-  }}
-/>
-  <div style={{ position: 'relative', zIndex: 1 }}>
-    
+      style={{
+        minHeight: '100vh',
+        color: '#e4e4e7',
+        background:
+          'linear-gradient(rgba(0,0,0,0.6), rgba(9,9,11,1)), url(/bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       <Header />
 
       {/* HERO */}
       <div style={{ borderBottom: '1px solid #27272a' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
-          <h1 style={{ fontSize: '48px', fontWeight: '900', marginBottom: '10px' }}>
+        <div
+          style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '40px 20px'
+          }}
+        >
+          <h1
+            style={{
+              fontSize: '48px',
+              fontWeight: '900',
+              marginBottom: '10px'
+            }}
+          >
             Архив 909
           </h1>
 
@@ -73,10 +76,16 @@ export default function Home() {
         </div>
       </div>
 
-<LabelMarquee />
+      <LabelMarquee />
 
       {/* ПОИСК */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+      <div
+        style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '20px'
+        }}
+      >
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -94,14 +103,22 @@ export default function Home() {
       </div>
 
       {/* КАТЕГОРИИ */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px' }}>
+      <div
+        style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 20px 40px'
+        }}
+      >
         <h2 style={{ fontSize: '20px', marginBottom: '10px' }}>
           Категории
         </h2>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
           {sheets.map((sheet) => {
-            const slug = sheet.name.toLowerCase().replace(/\s+/g, '-')
+            const slug = sheet.name
+              .toLowerCase()
+              .replace(/\s+/g, '-')
 
             return (
               <a
@@ -131,7 +148,6 @@ export default function Home() {
           })}
         </div>
       </div>
-
     </div>
   )
 }
