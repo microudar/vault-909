@@ -133,7 +133,7 @@ export default function LabelMarquee() {
       <Row speed={70} />
 
       {/* строка 2 (обратная и быстрее) */}
-      <Row reverse speed={50} />
+      <Row reverse speed={70} />
     </div>
   )
 }
