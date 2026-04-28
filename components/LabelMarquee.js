@@ -10,7 +10,17 @@ const labels = [
   'dekmantel',
   'delsin',
   'esp-institute',
-  'livity-sound'
+  'running-back',
+  'houndstooth',
+  'ilian-tape',
+  'hypercolour',
+  'kompakt',
+  'workshop',
+  'hyperdub',
+  'lobster-theremin',
+  'hotflush-recordings',
+  'livity-sound',
+  'dionysian-mysteries'
 ]
 
 export default function LabelMarquee() {
