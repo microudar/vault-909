@@ -31,40 +31,40 @@ export async function GET(req, { params }) {
       const json = XLSX.utils.sheet_to_json(sheet)
 
       json.forEach((row) => {
-  const text = Object.values(row).join(' ')
+        const text = Object.values(row).join(' ')
+        if (!text) return
 
-  if (!text) return
+        // === ARTISTS ===
+        const parts = text.split(' - ')
+        const artistPart = parts[0]
 
-  // === ARTISTS ===
-  const parts = text.split(' - ')
-  const artistPart = parts[0]
+        if (artistPart) {
+          artistPart
+            .replace(/\b[Vv]s\.?\b/g, ',')
+            .replace(/\b[Ff]eat\.?\b/g, ',')
+            .replace(/\b[Ff]t\.?\b/g, ',')
+            .split(/[\/,&,]/)
+            .map(a => a.trim())
+            .filter(Boolean)
+            .forEach((artist) => {
+              const slug = slugify(artist)
+              if (slug) {
+                urls.push(`https://vault909.ru/artist/${slug}`)
+              }
+            })
+        }
 
-  if (artistPart) {
-    artistPart
-      .replace(/\b[Vv]s\.?\b/g, ',')
-      .replace(/\b[Ff]eat\.?\b/g, ',')
-      .replace(/\b[Ff]t\.?\b/g, ',')
-      .split(/[\/,&,]/)
-      .map(a => a.trim())
-      .filter(Boolean)
-      .forEach(artist => {
-        const slug = slugify(artist)
-        if (slug) {
-          urls.push(`https://vault909.ru/artist/${slug}`)
+        // === LABEL ===
+        const labelMatch = text.match(/\[(.*?)\]/)
+
+        if (labelMatch) {
+          const label = labelMatch[1].split('/')[0].trim()
+          if (label) {
+            urls.push(`https://vault909.ru/label/${slugify(label)}`)
+          }
         }
       })
-  }
-
-  // === LABEL ===
-  const labelMatch = text.match(/\[(.*?)\]/)
-
-  if (labelMatch) {
-    const label = labelMatch[1].split('/')[0].trim()
-    if (label) {
-      urls.push(`https://vault909.ru/label/${slugify(label)}`)
-    }
-  }
-})
+    })
 
     const uniqueUrls = [...new Set(urls)]
 
@@ -90,8 +90,12 @@ ${selected
 </urlset>`
 
     return new Response(xml, {
-      headers: { 'Content-Type': 'application/xml' },
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'no-store'
+      },
     })
+
   } catch (e) {
     return new Response('Error', { status: 500 })
   }
