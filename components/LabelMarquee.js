@@ -130,7 +130,7 @@ export default function LabelMarquee() {
       <div style={fadeRight} />
 
       {/* строка 1 */}
-      <Row speed={30} />
+      <Row speed={10} />
 
       {/* строка 2 (обратная и быстрее) */}
       <Row reverse speed={20} />
