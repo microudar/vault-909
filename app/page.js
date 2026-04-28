@@ -146,36 +146,37 @@ export default function Home() {
               </a>
             )
           })}
-{/* FOOTER */}
-<div
-  style={{
-    marginTop: '60px',
-    borderTop: '1px solid #27272a',
-    padding: '20px',
-    textAlign: 'center',
-    color: '#71717a',
-    fontSize: '13px'
-  }}
->
-  <div>
-    Contact:{" "}
-    <a
-      href="mailto:microudar12@mail.ru"
-      style={{
-        color: '#a1a1aa',
-        textDecoration: 'none'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.color = '#60a5fa'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.color = '#a1a1aa'
-      }}
-    >
-      your@email.com
-    </a>
-  </div>
-</div>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div
+        style={{
+          marginTop: '60px',
+          borderTop: '1px solid #27272a',
+          padding: '20px',
+          textAlign: 'center',
+          color: '#71717a',
+          fontSize: '13px'
+        }}
+      >
+        <div>
+          Contact:{' '}
+          <a
+            href="mailto:microudar12@mail.ru"
+            style={{
+              color: '#a1a1aa',
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#60a5fa'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#a1a1aa'
+            }}
+          >
+            microudar12@mail.ru
+          </a>
         </div>
       </div>
     </div>
