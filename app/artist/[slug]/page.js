@@ -190,6 +190,19 @@ export default function ArtistPage() {
           {name || slug}
         </h1>
 
+          <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
+  {name || slug}
+</h1>
+
+<p style={{
+  color: '#a1a1aa',
+  marginBottom: '20px',
+  maxWidth: '600px'
+}}>
+  {name || slug} — электронный артист. Здесь собрана полная дискография,
+  включая EP, альбомы и редкие релизы.
+</p>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           
           {releases.map((r, i) => {
