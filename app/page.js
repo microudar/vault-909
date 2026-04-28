@@ -33,8 +33,26 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#09090b', color: '#e4e4e7' }}>
-      
+    <div
+  style={{
+    minHeight: '100vh',
+    color: '#e4e4e7',
+    backgroundImage: 'url(/bg.jpg)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed'
+  }}
+>
+  <div
+  style={{
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0,0,0,0.75)',
+    zIndex: 0
+  }}
+/>
+  <div style={{ position: 'relative', zIndex: 1 }}>
+    
       <Header />
 
       {/* HERO */}
