@@ -5,32 +5,78 @@ import * as XLSX from 'xlsx'
 function slugify(text) {
   return text
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\+/g, 'plus')
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
 }
 
 export async function GET() {
   try {
-    const res = await fetch('https://vault909.ru/music.xlsx')
+    const base = 'https://vault909.ru'
+
+    const res = await fetch(`${base}/music.xlsx`)
     const buffer = await res.arrayBuffer()
 
     const workbook = XLSX.read(buffer, { type: 'array' })
 
-    const urls = []
+    const urls = new Set()
 
     // главная
-    urls.push('https://vault909.ru')
+    urls.add(base)
 
+    // категории (sheet)
+    workbook.SheetNames.forEach((sheet) => {
+      urls.add(`${base}/sheet/${slugify(sheet)}`)
+    })
+
+    // артисты + лейблы
     workbook.SheetNames.forEach((sheetName) => {
-      urls.push(`https://vault909.ru/sheet/${slugify(sheetName)}`)
+      const sheet = workbook.Sheets[sheetName]
+      const data = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+      data.forEach((row) => {
+        const text = Array.isArray(row) ? row.join(' ') : ''
+        if (!text) return
+
+        // артисты
+        const parts = text.split(' - ')
+        const artistPart = parts[0]
+
+        if (artistPart) {
+          artistPart
+            .replace(/\b(feat|ft|vs)\.?/gi, ',')
+            .split(/[\/,&,]/)
+            .map(a => a.trim())
+            .filter(Boolean)
+            .forEach(a => {
+              urls.add(`${base}/artist/${slugify(a)}`)
+            })
+        }
+
+        // лейбл
+        const match = text.match(/\[(.*?)\]/)
+        if (match) {
+          const label = match[1].split('/')[0].trim()
+          if (label) {
+            urls.add(`${base}/label/${slugify(label)}`)
+          }
+        }
+      })
     })
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(url => `
+${Array.from(urls)
+  .map(
+    (url) => `
   <url>
     <loc>${url}</loc>
-  </url>`).join('')}
+  </url>`
+  )
+  .join('')}
 </urlset>`
 
     return new Response(xml, {
