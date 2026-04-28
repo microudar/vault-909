@@ -2,25 +2,15 @@
 
 const labels = [
   'analogical-force',
+  'aus-music',
+  'border-community',
+  'central-processing-unit',
   'tresor',
-  'planet-mu',
-  'warp',
-  'kompakt',
-  'perlon',
-  'chain-reaction',
-  'dial',
-  'ostgut-ton',
-  'clone',
-  'rephlex',
-  'skam',
-  'raster-noton',
-  'seminantica',
-  'artaphine-records',
-  'balmat',
-  'trust',
-  'jungle-gym-records',
-  'dansu-discs',
-  'la-bonne-musique'
+  'craigie-knowes',
+  'dekmantel',
+  'delsin',
+  'esp-institute',
+  'livity-sound'
 ]
 
 export default function LabelMarquee() {
