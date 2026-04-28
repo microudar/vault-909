@@ -20,6 +20,19 @@ const labels = [
   'lobster-theremin',
   'hotflush-recordings',
   'livity-sound',
+  'mechatronica',
+  'shall-not-fade',
+  'sneaker-social-club',
+  'semantica',
+  'ostgut-ton',
+  'pinkman',
+  'phonogramme',
+  'planet-mu',
+  'unknown-to-the-unknown',
+  'stroboscopic-artefacts',
+  'traum-schallplatten',
+  'ninja-tune',
+  'new-flesh',
   'dionysian-mysteries'
 ]
 
