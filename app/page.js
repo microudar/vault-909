@@ -163,7 +163,7 @@ export default function Home() {
         <div>
           Contact:{' '}
           <a
-            href="mailto:microudar12@mail.ru"
+            href="mailto:micro_udar12@mail.ru"
             style={{
               color: '#a1a1aa',
               textDecoration: 'none'
@@ -175,7 +175,7 @@ export default function Home() {
               e.currentTarget.style.color = '#a1a1aa'
             }}
           >
-            microudar12@mail.ru
+            micro_udar12@mail.ru
           </a>
         </div>
       </div>
