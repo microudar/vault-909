@@ -1,16 +1,11 @@
 export function GET() {
   return new Response(
-    `User-agent: *
+`User-agent: *
 Allow: /
 
-Disallow: /search
-
-Sitemap: https://your-domain.com/sitemap.xml
-`,
+Sitemap: https://vault909.ru/sitemap.xml`,
     {
-      headers: {
-        'Content-Type': 'text/plain',
-      },
+      headers: { 'Content-Type': 'text/plain' },
     }
   )
 }
