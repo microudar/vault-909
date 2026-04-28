@@ -65,7 +65,7 @@ const labels = [
   'dionysian-mysteries'
 ]
 
-function Row({ reverse = false, speed = 30 }) {
+function Row({ reverse = false, speed = 10 }) {
   return (
     <div
       className="marquee"
