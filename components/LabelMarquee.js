@@ -134,30 +134,6 @@ export default function LabelMarquee() {
 
       {/* строка 2 (обратная и быстрее) */}
       <Row reverse speed={20} />
-
-      <style jsx>{`
-        .marquee:hover {
-          animation-play-state: paused;
-        }
-
-        @keyframes scroll {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(-50%);
-          }
-        }
-
-        @keyframes scroll-reverse {
-          from {
-            transform: translateX(-50%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-      `}</style>
     </div>
   )
 }
