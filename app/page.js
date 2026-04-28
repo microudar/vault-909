@@ -1,5 +1,6 @@
 'use client'
 
+import LabelMarquee from '../components/LabelMarquee'
 import Header from '../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
@@ -53,6 +54,8 @@ export default function Home() {
           </p>
         </div>
       </div>
+
+<LabelMarquee />
 
       {/* ПОИСК */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
