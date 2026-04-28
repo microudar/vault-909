@@ -1,5 +1,5 @@
-import * as XLSX from 'xlsx'
 export const dynamic = 'force-dynamic'
+import * as XLSX from 'xlsx'
 
 function slugify(text) {
   return text
