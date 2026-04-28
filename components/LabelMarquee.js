@@ -36,7 +36,7 @@ export default function LabelMarquee() {
               src={`/logos/${slug}.png`}
               alt={slug}
               style={{
-                height: '40px',
+                height: '80px',
                 opacity: 0.8,
                 filter: 'grayscale(1)',
                 transition: '0.2s'
