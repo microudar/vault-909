@@ -11,6 +11,31 @@ function slugify(text) {
     .replace(/\s+/g, '-')
 }
 
+// парсим строку релиза
+function parseRow(text) {
+  const result = {
+    artists: [],
+    label: null
+  }
+
+  if (!text) return result
+
+  // 👉 ARTISTS (до " - ")
+  const artistPart = text.split(' - ')[0]
+  if (artistPart) {
+    result.artists = artistPart.split(',').map(a => a.trim())
+  }
+
+  // 👉 LABEL (внутри [...])
+  const labelMatch = text.match(/\[(.*?)\]/)
+  if (labelMatch) {
+    const labelPart = labelMatch[1].split('/')[0]
+    result.label = labelPart.trim()
+  }
+
+  return result
+}
+
 export async function GET() {
   try {
     const res = await fetch('https://vault909.ru/music.xlsx')
@@ -20,46 +45,40 @@ export async function GET() {
 
     const urls = new Set()
 
-    // Главная
+    // главная
     urls.add('https://vault909.ru/')
 
-    // Sheet страницы
+    // sheet страницы
     workbook.SheetNames.forEach((sheetName) => {
-      const sheetSlug = slugify(sheetName)
-      urls.add(`https://vault909.ru/sheet/${sheetSlug}`)
+      const slug = slugify(sheetName)
+      urls.add(`https://vault909.ru/sheet/${slug}`)
     })
 
-    // Данные из всех листов
+    // данные
     workbook.SheetNames.forEach((sheetName) => {
       const sheet = workbook.Sheets[sheetName]
-      const json = XLSX.utils.sheet_to_json(sheet)
 
-      json.forEach((row) => {
-        const keys = Object.keys(row)
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1
+      })
 
-        const artistKey = keys.find((k) =>
-          k.toLowerCase().includes('artist')
-        )
+      rows.forEach((row) => {
+        const text = row[0]
+        if (!text) return
 
-        const labelKey = keys.find((k) =>
-          k.toLowerCase().includes('label')
-        )
+        const parsed = parseRow(text)
 
-        // Артисты
-        if (artistKey && row[artistKey]) {
-          const artists = String(row[artistKey]).split(',')
+        // артисты
+        parsed.artists.forEach((artist) => {
+          const slug = slugify(artist)
+          if (slug) {
+            urls.add(`https://vault909.ru/artist/${slug}`)
+          }
+        })
 
-          artists.forEach((artist) => {
-            const slug = slugify(artist.trim())
-            if (slug) {
-              urls.add(`https://vault909.ru/artist/${slug}`)
-            }
-          })
-        }
-
-        // Лейблы
-        if (labelKey && row[labelKey]) {
-          const slug = slugify(row[labelKey])
+        // лейбл
+        if (parsed.label) {
+          const slug = slugify(parsed.label)
           if (slug) {
             urls.add(`https://vault909.ru/label/${slug}`)
           }
