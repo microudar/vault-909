@@ -206,8 +206,12 @@ export default function LabelClient({ slug }) {
   }
 
   useEffect(() => {
-    releases.slice(0, 15).forEach(fetchCover)
-  }, [releases])
+  releases.forEach((r, i) => {
+    setTimeout(() => {
+      fetchCover(r)
+    }, i * 300)
+  })
+}, [releases])
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
