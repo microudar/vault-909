@@ -68,7 +68,7 @@ function parseRelease(text) {
   return { artists, title, year, label, catalog }
 }
 
-export default function ArtistClient({ slug })
+export default function ArtistClient({ slug }) {
 
   const [releases, setReleases] = useState([])
   const [name, setName] = useState('')
