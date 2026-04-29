@@ -4,7 +4,6 @@ import ReleaseLinks from '../../../components/ReleaseLinks'
 import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
-import { useParams } from 'next/navigation'
 
 function normalizeSlug(text) {
   return text
@@ -69,8 +68,7 @@ function parseRelease(text) {
   return { artists, title, year, label, catalog }
 }
 
-export default function ArtistPage() {
-  const { slug } = useParams()
+export default function ArtistClient({ slug })
 
   const [releases, setReleases] = useState([])
   const [name, setName] = useState('')
