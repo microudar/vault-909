@@ -160,8 +160,12 @@ export default function ArtistClient({ slug }) {
 
   // 🔥 грузим только часть (ускорение)
   useEffect(() => {
-    releases.slice(0, 10).forEach(fetchCover)
-  }, [releases])
+  releases.forEach((r, i) => {
+    setTimeout(() => {
+      fetchCover(r)
+    }, i * 300)
+  })
+}, [releases])
 
   return (
     <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff' }}>
