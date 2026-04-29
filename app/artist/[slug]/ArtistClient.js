@@ -130,9 +130,7 @@ export default function ArtistClient({ slug }) {
     const query = encodeURIComponent(`${r.artists.join(' ')} ${r.title} ${r.year}`)
 
     try {
-      const res = await fetch(
-        `https://api.discogs.com/database/search?q=${query}&type=release&token=mepgfJTPhtqnOblpeswuQuQpuVIeAJZZOvhGFlQn`
-      )
+      const res = await fetch(`/api/discogs?q=${query}`)
       const data = await res.json()
 
       const cover =
