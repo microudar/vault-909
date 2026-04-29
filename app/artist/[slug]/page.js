@@ -12,5 +12,27 @@ export async function generateMetadata({ params }) {
 }
 
 export default function Page({ params }) {
-  return <ArtistClient slug={params.slug} />
+  const name = params.slug
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase())
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'MusicGroup',
+    name,
+    url: `https://vault909.ru/artist/${params.slug}`,
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(schema),
+        }}
+      />
+
+      <ArtistClient slug={params.slug} />
+    </>
+  )
 }
