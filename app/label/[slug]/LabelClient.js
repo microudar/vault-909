@@ -177,7 +177,7 @@ export default function LabelClient({ slug }) {
     // 1. Discogs
     try {
       const res = await fetch(
-        `https://api.discogs.com/database/search?q=${query}&type=release`
+        `https://api.discogs.com/database/search?q=${query}&type=release&token=mepgfJTPhtqnOblpeswuQuQpuVIeAJZZOvhGFlQn`
       )
       const data = await res.json()
 
