@@ -1,4 +1,4 @@
-import releases from '@/data/releases.json'
+import releases from '../../../data/releases.json'
 
 export async function generateMetadata({ params }) {
   const name = params.slug
