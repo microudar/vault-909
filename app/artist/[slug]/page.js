@@ -20,31 +20,15 @@ export default function Page({ params }) {
     (r) => r.artist?.toLowerCase() === name.toLowerCase()
   )
 
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'MusicGroup',
-    name,
-    url: `https://vault909.ru/artist/${params.slug}`,
-  }
-
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema),
-        }}
-      />
+    <div style={{ padding: 20 }}>
+      <h1>{name}</h1>
 
-      <div>
-        <h1>{name}</h1>
-
-        {artistReleases.slice(0, 100).map((r, i) => (
-          <div key={i}>
-            {r.artist} — {r.title} ({r.year})
-          </div>
-        ))}
-      </div>
-    </>
+      {artistReleases.slice(0, 100).map((r, i) => (
+        <div key={i}>
+          {r.artist} — {r.title} ({r.year})
+        </div>
+      ))}
+    </div>
   )
 }
