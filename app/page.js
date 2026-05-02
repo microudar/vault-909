@@ -3,28 +3,30 @@
 import LabelMarquee from '../components/LabelMarquee'
 import Header from '../components/Header'
 import { useEffect, useState } from 'react'
-import * as XLSX from 'xlsx'
 
 export default function Home() {
   const [sheets, setSheets] = useState([])
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    fetch('/music.xlsx')
-      .then((res) => res.arrayBuffer())
-      .then((buffer) => {
-        const workbook = XLSX.read(buffer, { type: 'array' })
+  fetch('/data/albums.json')
+    .then((res) => res.json())
+    .then((data) => {
+      // Получаем уникальные label'ы
+      const uniqueLabels = [
+        ...new Set(data.map((item) => item.label).filter(Boolean))
+      ]
 
-        const loadedSheets = workbook.SheetNames.map((name) => ({
-          name,
-        }))
+      const loadedSheets = uniqueLabels.map((label) => ({
+        name: label
+      }))
 
-        setSheets(loadedSheets)
-      })
-      .catch((error) => {
-        console.error('Ошибка загрузки Excel:', error)
-      })
-  }, [])
+      setSheets(loadedSheets)
+    })
+    .catch((error) => {
+      console.error('Ошибка загрузки JSON:', error)
+    })
+}, [])
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && query.trim()) {
