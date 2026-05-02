@@ -1,4 +1,4 @@
-import ArtistClient from './ArtistClient'
+import releases from '@/public/data/releases.json'
 
 export async function generateMetadata({ params }) {
   const name = params.slug
@@ -16,6 +16,10 @@ export default function Page({ params }) {
     .replace(/-/g, ' ')
     .replace(/\b\w/g, l => l.toUpperCase())
 
+  const artistReleases = releases.filter(
+    (r) => r.artist?.toLowerCase() === name.toLowerCase()
+  )
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'MusicGroup',
@@ -32,7 +36,15 @@ export default function Page({ params }) {
         }}
       />
 
-      <ArtistClient slug={params.slug} />
+      <div>
+        <h1>{name}</h1>
+
+        {artistReleases.slice(0, 100).map((r, i) => (
+          <div key={i}>
+            {r.artist} — {r.title} ({r.year})
+          </div>
+        ))}
+      </div>
     </>
   )
 }
