@@ -34,7 +34,7 @@ workbook.SheetNames.forEach((sheetName) => {
 
 const outputPath = path.join(
   __dirname,
-  '../public/data/releases.json'
+  '../data/releases.json'
 )
 
 fs.writeFileSync(
