@@ -16,9 +16,10 @@ export default function Page({ params }) {
     .replace(/-/g, ' ')
     .replace(/\b\w/g, l => l.toUpperCase())
 
-  const artistReleases = releases.filter(
-    (r) => r.artist?.toLowerCase() === name.toLowerCase()
-  )
+ const artistReleases = releases.filter((r) => {
+  const full = `${r.artist || ''} ${r.title || ''}`.toLowerCase()
+  return full.includes(name.toLowerCase())
+})
 
   return (
     <div style={{ padding: 20 }}>
