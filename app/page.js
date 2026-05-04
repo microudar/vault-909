@@ -159,9 +159,10 @@ export default function Home() {
           </div>
         )}
       </div>
-    </div>
+           )}
+      </div>
 
-  {/* FOOTER */}
+      {/* FOOTER */}
       <div
         style={{
           marginTop: '60px',
@@ -210,7 +211,7 @@ export default function Home() {
             <path d="M4 4l8 8 8-8" />
           </svg>
         </a>
-   </div>
+      </div>
     </div>
   )
 }
