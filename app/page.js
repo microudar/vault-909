@@ -12,7 +12,6 @@ export default function Home() {
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(-1)
 
-  // ⚡ Fuse (fuzzy search)
   const fuse = useMemo(() => {
     return new Fuse(releases, {
       keys: ['artist', 'title', 'label'],
@@ -25,7 +24,6 @@ export default function Home() {
     return fuse.search(query).slice(0, 8).map(r => r.item)
   }, [query, fuse])
 
-  // 🔍 highlight
   const highlight = (text) => {
     if (!query) return text
     const regex = new RegExp(`(${query})`, 'gi')
@@ -36,7 +34,6 @@ export default function Home() {
     )
   }
 
-  // ⌨️ клавиатура
   const handleKey = (e) => {
     if (e.key === 'ArrowDown') {
       setActiveIndex(i => Math.min(i + 1, results.length - 1))
@@ -75,7 +72,7 @@ export default function Home() {
 
       <LabelMarquee />
 
-      {/* 🔍 SEARCH */}
+      {/* SEARCH */}
       <div style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px', position: 'relative' }}>
         <input
           value={query}
@@ -96,7 +93,6 @@ export default function Home() {
           }}
         />
 
-        {/* RESULTS */}
         {results.length > 0 && (
           <div
             style={{
@@ -124,7 +120,6 @@ export default function Home() {
                   borderBottom: '1px solid #27272a'
                 }}
               >
-                {/* 🎵 COVER */}
                 <div
                   style={{
                     width: '40px',
@@ -144,12 +139,10 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* TEXT */}
                 <div>
                   <div style={{ fontWeight: '500' }}>
                     {highlight(r.artist)} — {highlight(r.title)}
                   </div>
-
                   <div style={{ fontSize: '12px', color: '#a1a1aa' }}>
                     {highlight(r.label)} • {r.year}
                   </div>
@@ -158,8 +151,6 @@ export default function Home() {
             ))}
           </div>
         )}
-      </div>
-           )}
       </div>
 
       {/* FOOTER */}
@@ -186,30 +177,8 @@ export default function Home() {
             transition: '0.2s',
             cursor: 'pointer'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#60a5fa'
-            e.currentTarget.style.boxShadow = '0 0 10px rgba(96,165,250,0.5)'
-            e.currentTarget.querySelector('svg').style.stroke = '#60a5fa'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#27272a'
-            e.currentTarget.style.boxShadow = 'none'
-            e.currentTarget.querySelector('svg').style.stroke = '#a1a1aa'
-          }}
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a1a1aa"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
-            <path d="M4 4l8 8 8-8" />
-          </svg>
+          ✉
         </a>
       </div>
     </div>
