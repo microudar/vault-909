@@ -65,7 +65,7 @@ export default function Home() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
           <h1 style={{ fontSize: '48px', fontWeight: '900' }}>Архив 909</h1>
           <p style={{ color: '#a1a1aa', marginTop: '10px' }}>
-            Electronic music archive database (over 70k releases) of techno, house, electro, ambient...
+            Electronic music archive database (over 70k releases)
           </p>
         </div>
       </div>
@@ -120,24 +120,12 @@ export default function Home() {
                   borderBottom: '1px solid #27272a'
                 }}
               >
-                <div
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    background: '#000',
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    flexShrink: 0
-                  }}
-                >
-                  {r.cover && (
-                    <img
-                      src={r.cover}
-                      alt=""
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  )}
-                </div>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  background: '#000',
+                  borderRadius: '6px'
+                }} />
 
                 <div>
                   <div style={{ fontWeight: '500' }}>
@@ -169,16 +157,38 @@ export default function Home() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '36px',
-            height: '36px',
+            width: '40px',
+            height: '40px',
             border: '1px solid #27272a',
-            borderRadius: '8px',
+            borderRadius: '10px',
             background: '#18181b',
             transition: '0.2s',
             cursor: 'pointer'
           }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = '#60a5fa'
+            e.currentTarget.style.boxShadow = '0 0 12px rgba(96,165,250,0.6)'
+            e.currentTarget.querySelector('svg').style.stroke = '#60a5fa'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#27272a'
+            e.currentTarget.style.boxShadow = 'none'
+            e.currentTarget.querySelector('svg').style.stroke = '#a1a1aa'
+          }}
         >
-          ✉
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#a1a1aa"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="M3 7l9 6 9-6" />
+          </svg>
         </a>
       </div>
     </div>
