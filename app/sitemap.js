@@ -2,7 +2,7 @@ import releases from '../data/releases.json'
 import { slugify } from '../lib/slugify'
 
 export default function sitemap() {
-  const base = 'https://vault-909.vercel.app'
+  const base = 'https://vault909.ru'
 
   const artistSet = new Set()
   const labelSet = new Set()
