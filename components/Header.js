@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 
-export default function Header() {
+export default function Header({ hideNav = false }) {
+  if (hideNav) return null
+
   return (
     <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
       
