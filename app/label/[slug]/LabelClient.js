@@ -1,43 +1,12 @@
 'use client'
 
+import releasesData from '../../../data/releases.json'
 import ReleaseLinks from '../../../components/ReleaseLinks'
 import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
-import * as XLSX from 'xlsx'
+import { slugify } from '../../../lib/slugify'
+import { splitArtists } from '../../../lib/artistParser'
 
-// slug
-function normalizeSlug(text) {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\+/g, 'plus')
-    .replace(/&/g, 'and')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-}
-
-// ключ
-function getKey(r) {
-  return `${r.artists.join('-')}-${r.title}`
-}
-
-// номер из каталога
-function extractNumber(str) {
-  const match = str?.match(/\d+/)
-  return match ? Number(match[0]) : 0
-}
-
-// уникальность
-function getReleaseKey(r) {
-  return [
-    r.artists.join(','),
-    r.title,
-    r.year
-  ].join('|').toLowerCase()
-}
-
-// sheet → label
 const SHEET_LABELS = {
   '1': 'M_nus',
   '2': 'Plus 8 Records Ltd.',
@@ -67,105 +36,56 @@ const SHEET_LABELS = {
   '26': 'Border Community',
 }
 
-// парсер
-function parseRelease(text) {
-  if (!text) return {}
-
-  text = text.replace(/\[\[/g, '[')
-  const match = text.match(/\[(.*?)\]/)
-
-  let label = ''
-  let catalog = ''
-
-  if (match) {
-    const inside = match[1].replace(/\/+/g, '/').trim()
-
-    if (inside.includes('/')) {
-      const parts = inside.split('/')
-      label = parts[0]?.trim() || ''
-      catalog = parts[1]?.trim() || ''
-    } else {
-      catalog = inside
-    }
-  }
-
-  const cleaned = text.replace(/\[.*?\]/, '').trim()
-  const parts = cleaned.split(' - ')
-  const artistPart = parts.shift()
-  const rest = parts.join(' - ')
-
-  const artists = artistPart
-    ? artistPart
-        .replace(/\b(feat|ft|vs)\.?/gi, ',')
-        .split(/[\/,&,]/)
-        .map(a => a.trim())
-        .filter(Boolean)
-    : []
-
-  let title = ''
-  let year = ''
-
-  if (rest) {
-    const words = rest.trim().split(' ')
-    year = words.pop()
-    title = words.join(' ')
-  }
-
-  return { artists, title, year, label, catalog }
+function getKey(r) {
+  return `${r.artists.join('-')}-${r.title}-${r.catalog}`
 }
 
 export default function LabelClient({ slug }) {
-
   const [releases, setReleases] = useState([])
-  const [labelName, setLabelName] = useState('')
+  const [name, setName] = useState('')
   const [covers, setCovers] = useState({})
+  const [sortMode, setSortMode] = useState('catalog')
 
   useEffect(() => {
-    fetch('/music.xlsx')
-      .then(res => res.arrayBuffer())
-      .then(buffer => {
-        const workbook = XLSX.read(buffer, { type: 'array' })
+    let filtered = []
 
-        let all = []
-        const seen = new Set()
+    releasesData.forEach((r) => {
+      const label =
+        r.label ||
+        SHEET_LABELS[String(r.sheet)] ||
+        ''
 
-        workbook.SheetNames.forEach(sheetName => {
-          const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 })
+      if (slugify(label) === slug) {
+        const artists = splitArtists(r.artist)
 
-          data.forEach(row => {
-            const parsed = parseRelease(Array.isArray(row) ? row.join(' ') : '')
-
-            if (SHEET_LABELS[sheetName]) {
-              parsed.label = parsed.label || SHEET_LABELS[sheetName]
-            }
-
-            if (normalizeSlug(parsed.label) === slug) {
-              const key = getReleaseKey(parsed)
-
-              if (!seen.has(key)) {
-                seen.add(key)
-                all.push(parsed)
-              }
-
-              if (!labelName) setLabelName(parsed.label)
-            }
-          })
+        filtered.push({
+          artists,
+          title: r.title || '',
+          year: r.year || '',
+          label,
+          catalog: r.catalog_number || ''
         })
 
-        // сортировка по каталогу
-        all.sort((a, b) => {
-          const numA = extractNumber(a.catalog)
-          const numB = extractNumber(b.catalog)
+        if (!name) setName(label)
+      }
+    })
 
-          if (numA !== numB) return numA - numB
-          return (a.catalog || '').localeCompare(b.catalog || '')
-        })
-
-        setReleases(all)
-      })
+    setReleases(filtered)
   }, [slug])
 
-  // 🔥 ОБЛОЖКИ
+  // 🔥 сортировка
+  const sorted = releases.slice().sort((a, b) => {
+    if (sortMode === 'year') {
+      return Number(b.year) - Number(a.year)
+    }
+
+    // лучший вариант сортировки каталога
+    return (a.catalog || '').localeCompare(b.catalog || '', undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    })
+  })
+
   async function fetchCover(r) {
     const key = getKey(r)
     if (covers[key]) return
@@ -174,7 +94,6 @@ export default function LabelClient({ slug }) {
       `${r.artists.join(' ')} ${r.title} ${r.year}`
     )
 
-    // 1. Discogs
     try {
       const res = await fetch(`/api/discogs?q=${query}`)
       const data = await res.json()
@@ -189,7 +108,6 @@ export default function LabelClient({ slug }) {
       }
     } catch {}
 
-    // 2. iTunes fallback
     try {
       const itunes = await fetch(
         `https://itunes.apple.com/search?term=${query}&entity=album`
@@ -204,121 +122,132 @@ export default function LabelClient({ slug }) {
   }
 
   useEffect(() => {
-  releases.forEach((r, i) => {
-    setTimeout(() => {
-      fetchCover(r)
-    }, i * 300)
-  })
-}, [releases])
+    releases.forEach((r, i) => {
+      setTimeout(() => fetchCover(r), i * 200)
+    })
+  }, [releases])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff', padding: '40px' }}>
-      
+    <div style={{ minHeight: '100vh', background: '#09090b', color: '#fff' }}>
       <Header />
 
-      <button
-        onClick={() => window.history.back()}
-        style={{
-          marginBottom: '20px',
-          padding: '8px 14px',
-          background: '#18181b',
-          border: '1px solid #27272a',
-          color: '#fff',
-          cursor: 'pointer'
-        }}
-      >
-        ← Назад
-      </button>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+        <button
+          onClick={() => window.history.back()}
+          style={{
+            marginBottom: '20px',
+            padding: '8px 14px',
+            background: '#18181b',
+            border: '1px solid #27272a',
+            color: '#fff',
+            cursor: 'pointer'
+          }}
+        >
+          ← Назад
+        </button>
 
         <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>
-  {labelName || slug}
-</h1>
+          {name || slug}
+        </h1>
 
-<p style={{
-  color: '#a1a1aa',
-  marginBottom: '20px',
-  maxWidth: '600px'
-}}>
-  {labelName || slug} — лейбл электронной музыки. Здесь представлен каталог релизов,
-  включая EP, винил и альбомы.
-</p>
+        <p style={{
+          color: '#a1a1aa',
+          marginBottom: '20px',
+          maxWidth: '600px'
+        }}>
+          {name || slug} — лейбл электронной музыки. Здесь представлен каталог релизов.
+        </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {releases.map((r, i) => {
-          const key = getKey(r)
+        {/* 🔘 сортировка */}
+        <div style={{ marginBottom: '20px' }}>
+          <button
+            onClick={() => setSortMode('catalog')}
+            style={{
+              marginRight: '10px',
+              padding: '6px 12px',
+              background: sortMode === 'catalog' ? '#27272a' : '#18181b',
+              border: '1px solid #27272a',
+              color: '#fff',
+              cursor: 'pointer'
+            }}
+          >
+            Catalog
+          </button>
 
-          return (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                gap: '12px',
+          <button
+            onClick={() => setSortMode('year')}
+            style={{
+              padding: '6px 12px',
+              background: sortMode === 'year' ? '#27272a' : '#18181b',
+              border: '1px solid #27272a',
+              color: '#fff',
+              cursor: 'pointer'
+            }}
+          >
+            Year
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {sorted.map((r, i) => {
+            const key = getKey(r)
+            const cover = covers[key]
+
+            return (
+              <div key={i} style={{
                 padding: '14px 16px',
                 border: '1px solid #27272a',
                 background: '#18181b',
                 borderRadius: '10px'
-              }}
-            >
-              {/* COVER */}
-              {covers[key] ? (
-                <img
-                  src={covers[key]}
-                  alt=""
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    objectFit: 'cover',
-                    borderRadius: '6px',
-                    flexShrink: 0
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    background: '#111',
-                    borderRadius: '6px',
-                    flexShrink: 0
-                  }}
-                />
-              )}
+              }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <img
+                    src={cover || '/no-cover.png'}
+                    alt=""
+                    style={{
+                      width: '56px',
+                      height: '56px',
+                      objectFit: 'cover',
+                      borderRadius: '6px'
+                    }}
+                  />
 
-              {/* CONTENT */}
-              <div style={{ flex: 1 }}>
-                <div>
-                  {r.artists.map((artist, i) => (
-                    <span key={i}>
-                      <a
-                        href={`/artist/${normalizeSlug(artist)}`}
-                        style={{ color: '#60a5fa', textDecoration: 'none' }}
-                      >
-                        {artist}
-                      </a>
-                      {i < r.artists.length - 1 && ', '}
-                    </span>
-                  ))}{' '}
-                  — {r.title} ({r.year})
+                  <div style={{ flex: 1 }}>
+                    <div>
+                      {r.artists.map((artist, i) => (
+                        <span key={i}>
+                          <a
+                            href={`/artist/${slugify(artist)}`}
+                            style={{ color: '#60a5fa', textDecoration: 'none' }}
+                          >
+                            {artist}
+                          </a>
+                          {i < r.artists.length - 1 && ', '}
+                        </span>
+                      ))}{' '}
+                      — {r.title} ({r.year})
+                    </div>
+
+                    <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+                      {r.label && (
+                        <a
+                          href={`/label/${slugify(r.label)}`}
+                          style={{ color: '#a1a1aa', textDecoration: 'none' }}
+                        >
+                          {r.label}
+                        </a>
+                      )}
+                      {r.label && r.catalog && ' / '}
+                      {r.catalog}
+                    </div>
+
+                    <ReleaseLinks r={r} />
+                  </div>
                 </div>
-
-                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-                  {r.label && (
-                    <a
-                      href={`/label/${normalizeSlug(r.label)}`}
-                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
-                    >
-                      {r.label}
-                    </a>
-                  )}
-                  {r.label && r.catalog && ' / '}
-                  {r.catalog}
-                </div>
-
-                <ReleaseLinks r={r} />
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )
