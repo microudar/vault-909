@@ -1,7 +1,9 @@
 import LabelClient from './LabelClient'
 
 export async function generateMetadata({ params }) {
-  const name = params.slug
+  const slug = params.slug
+
+  const name = slug
     .replace(/-/g, ' ')
     .replace(/\b\w/g, l => l.toUpperCase())
 
@@ -12,7 +14,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default function Page({ params }) {
-  const name = params.slug
+  const slug = params.slug
+
+  const name = slug
     .replace(/-/g, ' ')
     .replace(/\b\w/g, l => l.toUpperCase())
 
@@ -20,7 +24,7 @@ export default function Page({ params }) {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name,
-    url: `https://vault909.ru/label/${params.slug}`,
+    url: `https://vault909.ru/label/${slug}`,
   }
 
   return (
@@ -32,7 +36,8 @@ export default function Page({ params }) {
         }}
       />
 
-      <LabelClient slug={params.slug} />
+      {/* ✅ передаём slug как есть */}
+      <LabelClient slug={slug} />
     </>
   )
 }
