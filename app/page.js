@@ -68,7 +68,7 @@ export default function Home() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
           <h1 style={{ fontSize: '48px', fontWeight: '900' }}>Архив 909</h1>
           <p style={{ color: '#a1a1aa', marginTop: '10px' }}>
-            Архив электронной музыки
+            Electronic music archive database (over 70k releases) of techno, house, electro, ambient...
           </p>
         </div>
       </div>
