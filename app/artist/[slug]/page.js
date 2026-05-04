@@ -1,7 +1,10 @@
 import ArtistClient from './ArtistClient'
 
 export async function generateMetadata({ params }) {
-  const name = params.slug
+  const slug = params.slug
+
+  // делаем красивое имя только для SEO
+  const name = slug
     .replace(/-/g, ' ')
     .replace(/\b\w/g, l => l.toUpperCase())
 
@@ -12,7 +15,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default function Page({ params }) {
-  const name = params.slug
+  const slug = params.slug
+
+  const name = slug
     .replace(/-/g, ' ')
     .replace(/\b\w/g, l => l.toUpperCase())
 
@@ -20,7 +25,7 @@ export default function Page({ params }) {
     '@context': 'https://schema.org',
     '@type': 'MusicGroup',
     name,
-    url: `https://vault909.ru/artist/${params.slug}`,
+    url: `https://vault909.ru/artist/${slug}`,
   }
 
   return (
@@ -32,7 +37,8 @@ export default function Page({ params }) {
         }}
       />
 
-      <ArtistClient slug={params.slug} />
+      {/* 🔥 ВАЖНО — передаём slug, НЕ decoded */}
+      <ArtistClient slug={slug} />
     </>
   )
 }
