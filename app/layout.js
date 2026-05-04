@@ -1,8 +1,8 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'Архив 909',
-  description: 'Архив электронной музыки',
+  title: 'Архив 909 — electronic music database',
+  description: 'Database of techno, house, ambient and underground releases',
   icons: {
     icon: '/favicon.ico',
   },
