@@ -1,7 +1,7 @@
 import releases from '../../../data/releases.json'
 import { slugify } from '../../../lib/slugify'
 import Link from 'next/link'
-import Player from '@/app/components/Player'
+import Player from '@/app/components/player'
 
 export async function generateMetadata({ params }) {
   const release = releases.find(r => String(r.id) === params.slug)
