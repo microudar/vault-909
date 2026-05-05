@@ -74,22 +74,9 @@ export default function Page({ params }) {
         <Link href="/search" style={navBtn}>🔎 Поиск</Link>
       </div>
 
-      {/* 🔥 КНОПКА НАЗАД */}
-      <div style={{ marginBottom: 20 }}>
-        <button
-          onClick={() => window.history.back()}
-          style={{
-            padding: '6px 12px',
-            borderRadius: 6,
-            border: '1px solid #333',
-            background: '#111',
-            color: '#fff',
-            cursor: 'pointer'
-          }}
-        >
-          ← Назад
-        </button>
-      </div>
+      <Link href="/" style={navBtn}>
+  ← Назад
+</Link>
 
       {/* 🔥 Заголовок */}
       <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>
