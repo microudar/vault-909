@@ -26,6 +26,26 @@ export default function Page({ params }) {
     return <div style={{ padding: '40px', color: '#fff' }}>Not found</div>
   }
 
+  // 🔥 УМНЫЙ ПОИСК (VA + Untitled фикс)
+  const isVA =
+    release.artist?.toLowerCase() === 'va' ||
+    release.artist?.toLowerCase() === 'v.a.' ||
+    release.artist?.toLowerCase().includes('various')
+
+  const isUntitled =
+    release.title?.toLowerCase().includes('untitled')
+
+  const searchQuery =
+    isVA && isUntitled
+      ? `${release.label} ${release.catalog_number}`
+      : `${release.artist} ${release.title}`
+
+  // 🔗 Поисковые ссылки
+  const ytSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`
+  const bcSearch = `https://bandcamp.com/search?q=${encodeURIComponent(searchQuery)}`
+  const discogsSearch = `https://www.discogs.com/search/?q=${encodeURIComponent(searchQuery)}`
+
+  // 🎨 UI
   const navBtn = {
     padding: '6px 12px',
     background: '#18181b',
@@ -54,18 +74,6 @@ export default function Page({ params }) {
     opacity: 0.8
   }
 
-  const ytSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(
-    `${release.artist} ${release.title}`
-  )}`
-
-  const bcSearch = `https://bandcamp.com/search?q=${encodeURIComponent(
-    `${release.artist} ${release.title}`
-  )}`
-
-  const discogsSearch = `https://www.discogs.com/search/?q=${encodeURIComponent(
-    `${release.artist} ${release.title}`
-  )}`
-
   return (
     <div style={{ padding: '40px', color: '#fff', background: '#09090b', minHeight: '100vh' }}>
 
@@ -75,9 +83,10 @@ export default function Page({ params }) {
         <Link href="/search" style={navBtn}>🔎 Поиск</Link>
       </div>
 
+      {/* 🔥 Назад */}
       <div style={{ marginBottom: 20 }}>
-  <BackButton />
-</div>
+        <BackButton />
+      </div>
 
       {/* 🔥 Заголовок */}
       <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>
@@ -120,7 +129,7 @@ export default function Page({ params }) {
         {release.title} ({release.year}) — релиз {release.artist}, выпущенный на {release.label} ({release.catalog_number}).
       </div>
 
-      {/* 🔥 КНОПКИ С ИКОНКАМИ */}
+      {/* 🔥 Кнопки */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
 
         <a href={ytSearch} target="_blank" rel="noopener noreferrer" style={btn}>
@@ -142,6 +151,7 @@ export default function Page({ params }) {
 
       {/* 🔥 Плеер */}
       <Player release={release} />
+
     </div>
   )
 }
