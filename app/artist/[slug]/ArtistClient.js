@@ -6,6 +6,7 @@ import Header from '../../../components/Header'
 import { useEffect, useState } from 'react'
 import { slugify } from '@/lib/slugify'
 import { splitArtists } from '@/lib/artistParser'
+import Link from 'next/link'
 
 
 const SHEET_LABELS = {
@@ -68,6 +69,7 @@ export default function ArtistClient({ slug }) {
         const labelName = r.label || SHEET_LABELS[r.sheet] || ''
 
         filtered.push({
+          id: r.id,
           artists,
           title: r.title,
           year: r.year,
@@ -165,15 +167,31 @@ export default function ArtistClient({ slug }) {
             const cover = covers[key]
 
             return (
-              <div
-                key={i}
-                style={{
-                  padding: '14px 16px',
-                  border: '1px solid #27272a',
-                  background: '#18181b',
-                  borderRadius: '10px'
-                }}
-              >
+  <div
+  key={i}
+  onClick={(e) => {
+    // если клик по ссылке — не трогаем
+    if (e.target.closest('a')) return
+
+    window.location.href = `/release/${r.id}`
+  }}
+  style={{
+    padding: '14px 16px',
+    border: '1px solid #27272a',
+    background: '#18181b',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  }}
+  onMouseEnter={e => {
+    e.currentTarget.style.background = '#1f1f23'
+    e.currentTarget.style.borderColor = '#3f3f46'
+  }}
+  onMouseLeave={e => {
+    e.currentTarget.style.background = '#18181b'
+    e.currentTarget.style.borderColor = '#27272a'
+  }}
+>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <img
                     src={cover || '/no-cover.png'}
@@ -199,7 +217,10 @@ export default function ArtistClient({ slug }) {
                           {i < r.artists.length - 1 && ', '}
                         </span>
                       ))}{' '}
-                      — {r.title} ({r.year})
+                      —{' '}
+<Link href={`/release/${r.id}`} style={{ color: '#fff', textDecoration: 'none' }}>
+  {r.title} ({r.year})
+</Link>
                     </div>
 
                     <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
