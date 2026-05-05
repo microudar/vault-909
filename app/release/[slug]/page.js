@@ -75,9 +75,7 @@ export default function Page({ params }) {
         <Link href="/search" style={navBtn}>🔎 Поиск</Link>
       </div>
 
-      <Link href="/" style={navBtn}>
-  ← Назад
-</Link>
+      <BackButton />
 
       {/* 🔥 Заголовок */}
       <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>
