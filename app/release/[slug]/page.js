@@ -3,6 +3,7 @@ import { slugify } from '../../../lib/slugify'
 import Link from 'next/link'
 import Player from '@/app/components/Player'
 import BackButton from '@/app/components/BackButton'
+import Cover from '@/app/components/Cover'
 
 export async function generateMetadata({ params }) {
   const release = releases.find(r => String(r.id) === params.slug)
@@ -25,7 +26,7 @@ export default function Page({ params }) {
     return <div style={{ padding: '40px', color: '#fff' }}>Not found</div>
   }
 
-  // 🔥 умный поиск
+  // 🔥 УМНЫЙ ПОИСК (единый для всего)
   const isVA =
     release.artist?.toLowerCase() === 'va' ||
     release.artist?.toLowerCase().includes('various')
@@ -38,11 +39,12 @@ export default function Page({ params }) {
       ? `${release.label} ${release.catalog_number}`
       : `${release.artist} ${release.title}`
 
+  // 🔗 ссылки
   const ytSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`
   const bcSearch = `https://bandcamp.com/search?q=${encodeURIComponent(searchQuery)}`
   const discogsSearch = `https://www.discogs.com/search/?q=${encodeURIComponent(searchQuery)}`
 
-  // 🔥 related релизы
+  // 🔥 related
   const related = releases
     .filter(r => r.label === release.label && r.id !== release.id)
     .slice(0, 4)
@@ -81,16 +83,11 @@ export default function Page({ params }) {
 
       <BackButton />
 
-      {/* 🔥 MAIN BLOCK */}
+      {/* MAIN */}
       <div style={{ display: 'flex', gap: 40, marginTop: 20 }}>
 
-        {/* COVER */}
-        <div style={{ width: 220 }}>
-          <img
-            src={`https://via.placeholder.com/300x300?text=${encodeURIComponent(release.title)}`}
-            style={{ width: '100%', borderRadius: 12 }}
-          />
-        </div>
+        {/* 🔥 COVER */}
+        <Cover release={release} />
 
         {/* INFO */}
         <div style={{ flex: 1 }}>
@@ -106,7 +103,7 @@ export default function Page({ params }) {
             {release.year}
           </div>
 
-          {/* META BOX */}
+          {/* META */}
           <div style={{
             padding: 16,
             background: '#111',
@@ -114,7 +111,6 @@ export default function Page({ params }) {
             borderRadius: 10,
             marginBottom: 20
           }}>
-
             <div style={{ marginBottom: 10 }}>
               Label:{' '}
               <Link
@@ -136,7 +132,6 @@ export default function Page({ params }) {
             <div style={{ color: '#a1a1aa' }}>
               Cat: {release.catalog_number}
             </div>
-
           </div>
 
           {/* DESCRIPTION */}
@@ -146,19 +141,9 @@ export default function Page({ params }) {
 
           {/* BUTTONS */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-
-            <a href={ytSearch} target="_blank" style={btn}>
-              ▶ YouTube
-            </a>
-
-            <a href={bcSearch} target="_blank" style={btn}>
-              🟡 Bandcamp
-            </a>
-
-            <a href={discogsSearch} target="_blank" style={btn}>
-              ⬤ Discogs
-            </a>
-
+            <a href={ytSearch} target="_blank" style={btn}>▶ YouTube</a>
+            <a href={bcSearch} target="_blank" style={btn}>🟡 Bandcamp</a>
+            <a href={discogsSearch} target="_blank" style={btn}>⬤ Discogs</a>
           </div>
 
           {/* PLAYER */}
@@ -173,22 +158,18 @@ export default function Page({ params }) {
         </div>
       </div>
 
-      {/* 🔥 RELATED */}
+      {/* RELATED */}
       {related.length > 0 && (
         <div style={{ marginTop: 50 }}>
           <h3 style={{ marginBottom: 15 }}>More from {release.label}</h3>
 
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             {related.map(r => (
-              <Link
-                key={r.id}
-                href={`/release/${r.id}`}
-                style={{
-                  width: 200,
-                  textDecoration: 'none',
-                  color: '#fff'
-                }}
-              >
+              <Link key={r.id} href={`/release/${r.id}`} style={{
+                width: 200,
+                textDecoration: 'none',
+                color: '#fff'
+              }}>
                 <div style={{
                   background: '#111',
                   padding: 10,
