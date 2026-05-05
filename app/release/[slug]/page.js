@@ -153,12 +153,7 @@ export default function Page({ params }) {
       </div>
 
       {/* 🔥 Плеер */}
-      <Player
-        artist={release.artist}
-        title={release.title}
-        soundcloud={release.soundcloud}
-        bandcamp={release.bandcamp}
-      />
+      <Player release={release} />
     </div>
   )
 }
