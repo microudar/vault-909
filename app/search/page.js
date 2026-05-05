@@ -7,6 +7,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { slugify } from '@/lib/slugify'
 import { splitArtists } from '@/lib/artistParser'
 import Fuse from 'fuse.js'
+import Link from 'next/link'
 
 function normalize(text = '') {
   return text
@@ -156,73 +157,92 @@ export default function SearchPage() {
 
           return (
             <div
-              key={i}
-              style={{
-                display: 'flex',
-                gap: '12px',
-                padding: '14px 16px',
-                border: '1px solid #27272a',
-                background: '#18181b',
-                borderRadius: '10px'
-              }}
-            >
-              {/* COVER */}
-              {covers[key] ? (
-                <img
-                  src={covers[key]}
-                  alt=""
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    objectFit: 'cover',
-                    borderRadius: '6px',
-                    flexShrink: 0
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    background: '#111',
-                    borderRadius: '6px',
-                    flexShrink: 0
-                  }}
-                />
-              )}
+  key={i}
+  onClick={(e) => {
+    // если клик по ссылке — не трогаем
+    if (e.target.closest('a')) return
 
-              <div style={{ flex: 1 }}>
-                <div>
-                  {r.artists.map((artist, i) => (
-                    <span key={i}>
-                      <a
-                        href={`/artist/${slugify(artist)}`}
-                        style={{ color: '#60a5fa', textDecoration: 'none' }}
-                      >
-                        {highlight(artist, debouncedQuery)}
-                      </a>
-                      {i < r.artists.length - 1 && ', '}
-                    </span>
-                  ))}{' '}
-                  — {highlight(r.title, debouncedQuery)} ({r.year})
-                </div>
+    window.location.href = `/release/${r.id}`
+  }}
+  style={{
+    padding: '14px 16px',
+    border: '1px solid #27272a',
+    background: '#18181b',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  }}
+  onMouseEnter={e => {
+    e.currentTarget.style.background = '#1f1f23'
+    e.currentTarget.style.borderColor = '#3f3f46'
+  }}
+  onMouseLeave={e => {
+    e.currentTarget.style.background = '#18181b'
+    e.currentTarget.style.borderColor = '#27272a'
+  }}
+>
+  {/* COVER */}
+  {covers[key] ? (
+    <img
+      src={covers[key]}
+      alt=""
+      style={{
+        width: '60px',
+        height: '60px',
+        objectFit: 'cover',
+        borderRadius: '6px',
+        flexShrink: 0
+      }}
+    />
+  ) : (
+    <div
+      style={{
+        width: '60px',
+        height: '60px',
+        background: '#111',
+        borderRadius: '6px',
+        flexShrink: 0
+      }}
+    />
+  )}
 
-                <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
-                  {r.label && (
-                    <a
-                      href={`/label/${slugify(r.label)}`}
-                      style={{ color: '#a1a1aa', textDecoration: 'none' }}
-                    >
-                      {highlight(r.label, debouncedQuery)}
-                    </a>
-                  )}
-                  {r.label && r.catalog_number && ' / '}
-                  {highlight(r.catalog_number, debouncedQuery)}
-                </div>
+  <div style={{ flex: 1 }}>
+    <div>
+      {r.artists.map((artist, i) => (
+        <span key={i}>
+          <a
+            href={`/artist/${slugify(artist)}`}
+            style={{ color: '#60a5fa', textDecoration: 'none' }}
+          >
+            {highlight(artist, debouncedQuery)}
+          </a>
+          {i < r.artists.length - 1 && ', '}
+        </span>
+      ))}{' '}
+      
+      {/* 🔥 ТОЛЬКО НАЗВАНИЕ КЛИКАБЕЛЬНО */}
+      —{' '}
+      <Link href={`/release/${r.id}`} style={{ color: '#fff', textDecoration: 'none' }}>
+        {highlight(r.title, debouncedQuery)} ({r.year})
+      </Link>
+    </div>
 
-                <ReleaseLinks r={r} />
-              </div>
-            </div>
+    <div style={{ fontSize: '13px', color: '#71717a', marginTop: '4px' }}>
+      {r.label && (
+        <a
+          href={`/label/${slugify(r.label)}`}
+          style={{ color: '#a1a1aa', textDecoration: 'none' }}
+        >
+          {highlight(r.label, debouncedQuery)}
+        </a>
+      )}
+      {r.label && r.catalog_number && ' / '}
+      {highlight(r.catalog_number, debouncedQuery)}
+    </div>
+
+    <ReleaseLinks r={r} />
+  </div>
+</div>
           )
         })}
       </div>
