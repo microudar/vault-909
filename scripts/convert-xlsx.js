@@ -5,6 +5,8 @@ const workbook = XLSX.readFile('music.xlsx')
 const all = []
 const seen = new Set()
 
+let idCounter = 1
+
 /* ------------------ универсальный парсер ------------------ */
 
 function parseRow(row) {
@@ -15,7 +17,6 @@ function parseRow(row) {
   let label = ''
   let catalog_number = ''
 
-  /* ---------- 1. достаем [ ... ] ---------- */
   const bracketMatch = row.match(/\[(.*?)\]/)
 
   if (bracketMatch) {
@@ -32,7 +33,6 @@ function parseRow(row) {
     row = row.replace(bracketMatch[0], '').trim()
   }
 
-  /* ---------- 2. Artist - Title ---------- */
   let artist = ''
   let title = ''
 
@@ -44,17 +44,14 @@ function parseRow(row) {
     title = row
   }
 
-  /* ---------- 3. Year ---------- */
   let year = ''
+  const years = title.match(/\b(19|20)\d{2}\b/g)
 
-const years = title.match(/\b(19|20)\d{2}\b/g)
+  if (years && years.length) {
+    year = years[years.length - 1]
+    title = title.replace(/\b(19|20)\d{2}\b$/, '').trim()
+  }
 
-if (years && years.length) {
-  year = years[years.length - 1] // берём последний год
-  title = title.replace(/\b(19|20)\d{2}\b$/, '').trim()
-}
-
-  /* ---------- 4. артисты (разделение) ---------- */
   const artists = artist
     .split(/\s*(?:,|&|\/)\s*/i)
     .map(a => a.trim())
@@ -66,7 +63,12 @@ if (years && years.length) {
     title,
     year,
     label,
-    catalog_number
+    catalog_number,
+
+    // 🔥 ДОБАВИЛИ ПУСТЫЕ ПОЛЯ (ВАЖНО)
+    youtube: '',
+    soundcloud: '',
+    bandcamp: ''
   }
 }
 
@@ -84,15 +86,18 @@ workbook.SheetNames.forEach(sheetName => {
 
       if (parsed && parsed.title) {
         const key = [
-  parsed.artist?.toLowerCase(),
-  parsed.title?.toLowerCase(),
-  parsed.year,
-  parsed.catalog_number?.toLowerCase() || ''
-].join('|')
+          parsed.artist?.toLowerCase(),
+          parsed.title?.toLowerCase(),
+          parsed.year,
+          parsed.catalog_number?.toLowerCase() || ''
+        ].join('|')
 
         if (!seen.has(key)) {
           seen.add(key)
+
           parsed.sheet = sheetName
+          parsed.id = idCounter++
+
           all.push(parsed)
         }
       }
